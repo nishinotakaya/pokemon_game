@@ -1,72 +1,189 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ポケモンバトル：ピカチュウ vs イーブイ</title>
-    
+    <title>ポケモンバトル：リアルバージョン</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- React 17 CDN -->
     <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    
+
     <!-- Babel Standalone -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
+
     <style>
         /* バトルアニメーション定義 */
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
         }
-        
+
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
-        
+
         @keyframes flash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
         }
-        
+
         @keyframes slideIn {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
-        
+
         @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
-        
+
         @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 0, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 255, 0, 0.8); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+            }
         }
-        
-        .shake { animation: shake 0.5s ease-in-out; }
-        .bounce { animation: bounce 1s ease-in-out infinite; }
-        .flash { animation: flash 0.3s ease-in-out; }
-        .slide-in { animation: slideIn 0.8s ease-out; }
-        .slide-in-right { animation: slideInRight 0.8s ease-out; }
-        .glow { animation: glow 2s ease-in-out infinite; }
-        
+
+        @keyframes critical {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+                filter: brightness(1.5);
+            }
+        }
+
+        @keyframes statusEffect {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes missAnimation {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .bounce {
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        .flash {
+            animation: flash 0.3s ease-in-out;
+        }
+
+        .slide-in {
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .critical-hit {
+            animation: critical 0.6s ease-in-out;
+        }
+
+        .status-effect {
+            animation: statusEffect 2s ease-in-out infinite;
+        }
+
+        .miss-animation {
+            animation: missAnimation 2s ease-in-out;
+        }
+
         /* HPバーアニメーション */
         .hp-bar {
             transition: width 0.8s ease-in-out;
         }
-        
+
         /* バトルフィールド背景 */
         .battle-field {
             background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%);
             position: relative;
             overflow: hidden;
         }
-        
+
         .battle-field::before {
             content: '';
             position: absolute;
@@ -74,31 +191,54 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 50%);
+            background:
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
             pointer-events: none;
+        }
+
+        /* ポケモン選択モーダル */
+        .pokemon-selector {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .pokemon-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .pokemon-card.selected {
+            border: 3px solid #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
         }
     </style>
 </head>
+
 <body class="bg-gray-900 text-white min-h-screen">
     <div id="root"></div>
-    
+
     <script type="text/babel">
         const PokemonBattleComponent = () => {
-            // ポケモンデータ
-            const pokemonData = {
+            // ポケモンデータベース
+            const pokemonDatabase = {
                 pikachu: {
                     name: "ピカチュウ",
                     maxHP: 100,
                     type: "でんき",
                     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
                     moves: [
-                        { name: "でんきショック", power: 25, type: "でんき" },
-                        { name: "アイアンテール", power: 35, type: "はがね" },
-                        { name: "でんこうせっか", power: 20, type: "ノーマル" },
-                        { name: "10まんボルト", power: 45, type: "でんき" }
-                    ]
+                        { name: "でんきショック", power: 25, type: "でんき", accuracy: 95, pp: 15 },
+                        { name: "アイアンテール", power: 35, type: "はがね", accuracy: 85, pp: 10 },
+                        { name: "でんこうせっか", power: 20, type: "ノーマル", accuracy: 90, pp: 20 },
+                        { name: "10まんボルト", power: 45, type: "でんき", accuracy: 80, pp: 8 }
+                    ],
+                    stats: { attack: 55, defense: 40, speed: 90, special: 50 }
                 },
                 eevee: {
                     name: "イーブイ",
@@ -106,57 +246,113 @@
                     type: "ノーマル",
                     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png",
                     moves: [
-                        { name: "たいあたり", power: 25, type: "ノーマル" },
-                        { name: "すなかけ", power: 15, type: "じめん" },
-                        { name: "にどげり", power: 30, type: "かくとう" },
-                        { name: "シャドーボール", power: 40, type: "ゴースト" }
-                    ]
+                        { name: "でんこうせっか", power: 20, type: "ノーマル", accuracy: 90, pp: 20 },
+                        { name: "しっぽをふる", power: 15, type: "ノーマル", accuracy: 95, pp: 25 },
+                        { name: "とっしん", power: 30, type: "ノーマル", accuracy: 85, pp: 15 },
+                        { name: "かみなり", power: 40, type: "でんき", accuracy: 75, pp: 10 }
+                    ],
+                    stats: { attack: 55, defense: 50, speed: 55, special: 45 }
+                },
+                squirtle: {
+                    name: "ゼニガメ",
+                    maxHP: 100,
+                    type: "みず",
+                    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+                    moves: [
+                        { name: "水てっぽう", power: 30, type: "みず", accuracy: 90, pp: 15 },
+                        { name: "からにこもる", power: 10, type: "じめん", accuracy: 95, pp: 20 },
+                        { name: "メガトンパンチ", power: 40, type: "かくとう", accuracy: 80, pp: 12 },
+                        { name: "なみのり", power: 40, type: "みず", accuracy: 85, pp: 10 }
+                    ],
+                    stats: { attack: 48, defense: 65, speed: 43, special: 50 }
+                },
+                diglett: {
+                    name: "ディグダ",
+                    maxHP: 100,
+                    type: "じめん",
+                    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/50.png",
+                    moves: [
+                        { name: "じしん", power: 35, type: "じめん", accuracy: 85, pp: 12 },
+                        { name: "じわれ", power: 30, type: "じめん", accuracy: 90, pp: 15 },
+                        { name: "たいあたり", power: 25, type: "ノーマル", accuracy: 95, pp: 18 },
+                        { name: "すなかけ", power: 20, type: "じめん", accuracy: 85, pp: 20 }
+                    ],
+                    stats: { attack: 55, defense: 25, speed: 95, special: 35 }
                 }
             };
 
             // 状態管理
             const [gameState, setGameState] = React.useState({
-                pikachu: { ...pokemonData.pikachu, currentHP: 100 },
-                eevee: { ...pokemonData.eevee, currentHP: 100 },
-                currentTurn: "player", // "player" or "enemy"
+                playerPokemon: "pikachu",
+                enemyPokemon: "eevee",
+                pikachu: { ...pokemonDatabase.pikachu, currentHP: 100, status: null, pp: { 0: 15, 1: 10, 2: 20, 3: 8 } },
+                eevee: { ...pokemonDatabase.eevee, currentHP: 100, status: null, pp: { 0: 20, 1: 25, 2: 15, 3: 10 } },
+                squirtle: { ...pokemonDatabase.squirtle, currentHP: 100, status: null, pp: { 0: 15, 1: 20, 2: 12, 3: 10 } },
+                diglett: { ...pokemonDatabase.diglett, currentHP: 100, status: null, pp: { 0: 12, 1: 15, 2: 18, 3: 20 } },
+                currentTurn: "player",
                 battleLog: [],
                 isGameOver: false,
                 winner: null,
+                showPokemonSelector: false,
+                selectorMode: null, // "player" or "enemy"
                 animationState: {
                     pikachuShake: false,
                     eeveeShake: false,
+                    squirtleShake: false,
+                    diglettShake: false,
                     pikachuFlash: false,
                     eeveeFlash: false,
+                    squirtleFlash: false,
+                    diglettFlash: false,
+                    criticalHit: false,
                     battleMessage: ""
                 }
             });
 
-            // ダメージ計算関数（命中率システム追加）
+            // 詳細なタイプ相性チャート
+            const typeEffectiveness = {
+                'でんき': { 'みず': 2.0, 'じめん': 0.0, 'ノーマル': 1.0, 'はがね': 0.5 },
+                'みず': { 'じめん': 2.0, 'でんき': 0.5, 'ノーマル': 1.0, 'はがね': 1.0 },
+                'じめん': { 'でんき': 2.0, 'みず': 0.5, 'ノーマル': 1.0, 'はがね': 2.0 },
+                'はがね': { 'ノーマル': 1.2, 'でんき': 1.0, 'みず': 1.0, 'じめん': 0.5 },
+                'ノーマル': { 'はがね': 0.5, 'でんき': 1.0, 'みず': 1.0, 'じめん': 1.0 },
+                'かくとう': { 'ノーマル': 2.0, 'はがね': 2.0, 'でんき': 1.0, 'みず': 1.0 }
+            };
+
+            // ダメージ計算関数（よりリアル）
             const calculateDamage = (move, attacker, defender) => {
-                // 命中率判定（95%の確率で命中）
-                const hitChance = Math.random();
-                if (hitChance > 0.95) {
-                    return 0; // 攻撃外れ
+                // 命中率判定
+                const hitChance = Math.random() * 100;
+                if (hitChance > move.accuracy) {
+                    return { damage: 0, critical: false, effectiveness: 1.0, message: "miss" };
                 }
 
-                const baseDamage = move.power;
-                const randomFactor = 0.8 + Math.random() * 0.4; // 0.8-1.2倍のランダム要素
-                let damage = Math.floor(baseDamage * randomFactor);
-                
-                // タイプ相性システム（拡張版）
-                const typeChart = {
-                    'でんき': { 'ノーマル': 1.0, 'じめん': 0.5 },
-                    'はがね': { 'ノーマル': 1.2 },
-                    'ノーマル': { 'ゴースト': 0.0 },
-                    'じめん': { 'でんき': 2.0 },
-                    'かくとう': { 'ノーマル': 2.0 },
-                    'ゴースト': { 'ノーマル': 0.0 }
-                };
-                
-                const effectiveness = typeChart[move.type]?.[defender.type] ?? 1.0;
+                // クリティカルヒット判定（6.25%）
+                const isCritical = Math.random() < 0.0625;
+                const criticalMultiplier = isCritical ? 1.5 : 1.0;
+
+                // 基本ダメージ計算
+                const attackStat = attacker.stats.attack;
+                const defenseStat = defender.stats.defense;
+                const baseDamage = Math.floor(((2 * 50 / 5 + 2) * move.power * attackStat / defenseStat) / 50 + 2);
+
+                // ランダム要素（0.85-1.0倍）
+                const randomFactor = 0.85 + Math.random() * 0.15;
+                let damage = Math.floor(baseDamage * randomFactor * criticalMultiplier);
+
+                // タイプ相性
+                const effectiveness = typeEffectiveness[move.type]?.[defender.type] ?? 1.0;
                 damage = Math.floor(damage * effectiveness);
-                
-                return Math.max(1, damage); // 最低1ダメージ
+
+                // 最低1ダメージ
+                damage = Math.max(1, damage);
+
+                return {
+                    damage,
+                    critical: isCritical,
+                    effectiveness,
+                    message: effectiveness > 1.0 ? "super_effective" : effectiveness < 1.0 ? "not_very_effective" : "normal"
+                };
             };
 
             // アニメーション制御関数
@@ -184,47 +380,92 @@
             const addToBattleLog = (message) => {
                 setGameState(prev => ({
                     ...prev,
-                    battleLog: [...prev.battleLog.slice(-4), message] // 最新5件まで保持
+                    battleLog: [...prev.battleLog.slice(-4), message]
                 }));
             };
 
-            // 攻撃処理関数（攻撃外れ処理追加）
+            // 攻撃処理関数（よりリアル）
             const performAttack = (attackerKey, defenderKey, moveIndex) => {
                 if (gameState.isGameOver) return;
 
                 const attacker = gameState[attackerKey];
                 const defender = gameState[defenderKey];
                 const move = attacker.moves[moveIndex];
-                
-                const damage = calculateDamage(move, attacker, defender);
-                
+
+                // PPチェック
+                if (attacker.pp[moveIndex] <= 0) {
+                    addToBattleLog(`${attacker.name}の${move.name}のPPが足りない！`);
+                    return;
+                }
+
+                const result = calculateDamage(move, attacker, defender);
+
                 // アニメーション実行
-                const attackerAnimationTarget = attackerKey === "pikachu" ? "pikachuFlash" : "eeveeFlash";
+                const attackerAnimationTarget = `${attackerKey}Flash`;
                 triggerAnimation("flash", attackerAnimationTarget, 300);
-                
+
+                // PP消費
+                setGameState(prev => ({
+                    ...prev,
+                    [attackerKey]: {
+                        ...prev[attackerKey],
+                        pp: {
+                            ...prev[attackerKey].pp,
+                            [moveIndex]: prev[attackerKey].pp[moveIndex] - 1
+                        }
+                    }
+                }));
+
                 // バトルログ更新
                 addToBattleLog(`${attacker.name}の${move.name}！`);
-                
-                if (damage === 0) {
-                    // 攻撃外れ
+
+                if (result.message === "miss") {
                     addToBattleLog(`${attacker.name}の攻撃は外れた！`);
-                    
-                    // ターン交代
+                    // 攻撃外れアニメーション
+                    setGameState(prev => ({
+                        ...prev,
+                        animationState: {
+                            ...prev.animationState,
+                            battleMessage: "MISS!"
+                        }
+                    }));
+
+                    setTimeout(() => {
+                        setGameState(prev => ({
+                            ...prev,
+                            animationState: {
+                                ...prev.animationState,
+                                battleMessage: ""
+                            }
+                        }));
+                    }, 2000);
+
                     setGameState(prev => ({
                         ...prev,
                         currentTurn: prev.currentTurn === "player" ? "enemy" : "player"
                     }));
                     return;
                 }
-                
-                const newDefenderHP = Math.max(0, defender.currentHP - damage);
-                const defenderAnimationTarget = defenderKey === "pikachu" ? "pikachuShake" : "eeveeShake";
-                
+
+                const newDefenderHP = Math.max(0, defender.currentHP - result.damage);
+                const defenderAnimationTarget = `${defenderKey}Shake`;
+
                 setTimeout(() => {
                     triggerAnimation("shake", defenderAnimationTarget, 500);
                 }, 200);
 
-                addToBattleLog(`${defender.name}に${damage}ダメージ！`);
+                // 効果メッセージ
+                if (result.critical) {
+                    addToBattleLog("クリティカルヒット！");
+                }
+
+                if (result.message === "super_effective") {
+                    addToBattleLog("効果は抜群だ！");
+                } else if (result.message === "not_very_effective") {
+                    addToBattleLog("効果は今ひとつ...");
+                }
+
+                addToBattleLog(`${defender.name}に${result.damage}ダメージ！`);
 
                 // HP更新とゲーム状態更新
                 setGameState(prev => {
@@ -236,7 +477,6 @@
                         }
                     };
 
-                    // ゲーム終了判定
                     if (newDefenderHP <= 0) {
                         newState.isGameOver = true;
                         newState.winner = attackerKey;
@@ -245,7 +485,6 @@
                             addToBattleLog(`${attacker.name}の勝利！`);
                         }, 300);
                     } else {
-                        // ターン交代
                         newState.currentTurn = prev.currentTurn === "player" ? "enemy" : "player";
                     }
 
@@ -256,17 +495,48 @@
             // プレイヤー攻撃関数
             const playerAttack = (moveIndex) => {
                 if (gameState.currentTurn === "player" && !gameState.isGameOver) {
-                    performAttack("pikachu", "eevee", moveIndex);
+                    performAttack(gameState.playerPokemon, gameState.enemyPokemon, moveIndex);
                 }
             };
 
-            // 敵AI攻撃関数（1.5秒遅延に変更）
+            // 敵AI攻撃関数（より賢いAI）
             const enemyAttack = () => {
                 if (gameState.currentTurn === "enemy" && !gameState.isGameOver) {
-                    const randomMoveIndex = Math.floor(Math.random() * 4);
+                    const enemyPokemon = gameState[gameState.enemyPokemon];
+                    const playerPokemon = gameState[gameState.playerPokemon];
+
+                    // 利用可能な技をフィルタリング
+                    const availableMoves = enemyPokemon.moves.map((move, index) => ({
+                        ...move,
+                        index,
+                        pp: enemyPokemon.pp[index]
+                    })).filter(move => move.pp > 0);
+
+                    if (availableMoves.length === 0) {
+                        addToBattleLog(`${enemyPokemon.name}は技を使えない！`);
+                        setGameState(prev => ({
+                            ...prev,
+                            currentTurn: "player"
+                        }));
+                        return;
+                    }
+
+                    // タイプ相性を考慮した技選択
+                    let bestMove = availableMoves[0];
+                    let bestScore = 0;
+
+                    availableMoves.forEach(move => {
+                        const effectiveness = typeEffectiveness[move.type]?.[playerPokemon.type] ?? 1.0;
+                        const score = move.power * effectiveness;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = move;
+                        }
+                    });
+
                     setTimeout(() => {
-                        performAttack("eevee", "pikachu", randomMoveIndex);
-                    }, 1500); // 1.5秒後に攻撃
+                        performAttack(gameState.enemyPokemon, gameState.playerPokemon, bestMove.index);
+                    }, 1500);
                 }
             };
 
@@ -277,11 +547,31 @@
                 }
             }, [gameState.currentTurn]);
 
+            // ポケモン選択関数
+            const selectPokemon = (pokemonKey) => {
+                setGameState(prev => {
+                    const newState = { ...prev };
+
+                    if (prev.selectorMode === "player") {
+                        newState.playerPokemon = pokemonKey;
+                        newState[gameState.playerPokemon] = { ...pokemonDatabase[gameState.playerPokemon], currentHP: 100, status: null, pp: { 0: 15, 1: 10, 2: 20, 3: 8 } };
+                    } else if (prev.selectorMode === "enemy") {
+                        newState.enemyPokemon = pokemonKey;
+                        newState[gameState.enemyPokemon] = { ...pokemonDatabase[gameState.enemyPokemon], currentHP: 100, status: null, pp: { 0: 20, 1: 25, 2: 15, 3: 10 } };
+                    }
+
+                    newState.showPokemonSelector = false;
+                    newState.selectorMode = null;
+                    return newState;
+                });
+            };
+
             // ゲームリセット関数
             const resetGame = () => {
-                setGameState({
-                    pikachu: { ...pokemonData.pikachu, currentHP: 100 },
-                    eevee: { ...pokemonData.eevee, currentHP: 100 },
+                setGameState(prev => ({
+                    ...prev,
+                    [prev.playerPokemon]: { ...pokemonDatabase[prev.playerPokemon], currentHP: 100, status: null, pp: { 0: 15, 1: 10, 2: 20, 3: 8 } },
+                    [prev.enemyPokemon]: { ...pokemonDatabase[prev.enemyPokemon], currentHP: 100, status: null, pp: { 0: 20, 1: 25, 2: 15, 3: 10 } },
                     currentTurn: "player",
                     battleLog: ["バトル開始！"],
                     isGameOver: false,
@@ -289,11 +579,16 @@
                     animationState: {
                         pikachuShake: false,
                         eeveeShake: false,
+                        squirtleShake: false,
+                        diglettShake: false,
                         pikachuFlash: false,
                         eeveeFlash: false,
+                        squirtleFlash: false,
+                        diglettFlash: false,
+                        criticalHit: false,
                         battleMessage: ""
                     }
-                });
+                }));
             };
 
             // 初期化
@@ -317,9 +612,14 @@
                     'ノーマル': 'bg-gray-300 hover:bg-gray-400 text-gray-800',
                     'じめん': 'bg-amber-600 hover:bg-amber-700',
                     'かくとう': 'bg-red-600 hover:bg-red-700',
-                    'ゴースト': 'bg-purple-600 hover:bg-purple-700'
+                    'みず': 'bg-blue-500 hover:bg-blue-600'
                 };
                 return colors[type] || 'bg-blue-500 hover:bg-blue-600';
+            };
+
+            // 現在のポケモンを取得
+            const getCurrentPokemon = (key) => {
+                return gameState[gameState[key]];
             };
 
             // UI レンダリング
@@ -334,11 +634,11 @@
                     React.createElement('h1', {
                         key: 'title',
                         className: 'text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg'
-                    }, 'ポケモンバトル'),
+                    }, 'ポケモンバトル：リアルバージョン'),
                     React.createElement('p', {
                         key: 'subtitle',
                         className: 'text-lg text-white drop-shadow-md'
-                    }, 'ピカチュウ vs イーブイ')
+                    }, `${getCurrentPokemon('playerPokemon').name} vs ${getCurrentPokemon('enemyPokemon').name}`)
                 ]),
 
                 // メインバトルエリア
@@ -351,82 +651,102 @@
                         key: 'pokemon-area',
                         className: 'grid md:grid-cols-2 gap-8 mb-8'
                     }, [
-                        // ピカチュウ（プレイヤー）
+                        // プレイヤーポケモン
                         React.createElement('div', {
-                            key: 'pikachu-section',
-                            className: `text-center slide-in ${gameState.animationState.pikachuShake ? 'shake' : ''} ${gameState.animationState.pikachuFlash ? 'flash' : ''}`
+                            key: 'player-section',
+                            className: `text-center slide-in ${gameState.animationState[`${gameState.playerPokemon}Shake`] ? 'shake' : ''} ${gameState.animationState[`${gameState.playerPokemon}Flash`] ? 'flash' : ''}`
                         }, [
-                            React.createElement('h2', {
-                                key: 'pikachu-name',
-                                className: 'text-2xl font-bold text-yellow-400 mb-2'
-                            }, `${gameState.pikachu.name} (プレイヤー)`),
                             React.createElement('div', {
-                                key: 'pikachu-type',
+                                key: 'player-header',
+                                className: 'flex justify-between items-center mb-4'
+                            }, [
+                                React.createElement('h2', {
+                                    key: 'player-name',
+                                    className: 'text-2xl font-bold text-yellow-400'
+                                }, `${getCurrentPokemon('playerPokemon').name} (プレイヤー)`),
+                                React.createElement('button', {
+                                    key: 'change-player',
+                                    onClick: () => setGameState(prev => ({ ...prev, showPokemonSelector: true, selectorMode: "player" })),
+                                    className: 'bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm'
+                                }, '変更')
+                            ]),
+                            React.createElement('div', {
+                                key: 'player-type',
                                 className: 'inline-block bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold mb-4'
-                            }, gameState.pikachu.type + 'タイプ'),
+                            }, getCurrentPokemon('playerPokemon').type + 'タイプ'),
                             React.createElement('img', {
-                                key: 'pikachu-image',
-                                src: gameState.pikachu.image,
-                                alt: gameState.pikachu.name,
+                                key: 'player-image',
+                                src: getCurrentPokemon('playerPokemon').image,
+                                alt: getCurrentPokemon('playerPokemon').name,
                                 className: 'w-32 h-32 mx-auto mb-4 bounce',
                                 style: { imageRendering: 'pixelated' }
                             }),
                             // HP表示
                             React.createElement('div', {
-                                key: 'pikachu-hp',
+                                key: 'player-hp',
                                 className: 'mb-4'
                             }, [
                                 React.createElement('div', {
-                                    key: 'pikachu-hp-text',
+                                    key: 'player-hp-text',
                                     className: 'text-white font-bold mb-2'
-                                }, `HP: ${gameState.pikachu.currentHP}/${gameState.pikachu.maxHP}`),
+                                }, `HP: ${getCurrentPokemon('playerPokemon').currentHP}/${getCurrentPokemon('playerPokemon').maxHP}`),
                                 React.createElement('div', {
-                                    key: 'pikachu-hp-bar-bg',
+                                    key: 'player-hp-bar-bg',
                                     className: 'w-full bg-gray-700 rounded-full h-4'
                                 }, React.createElement('div', {
-                                    key: 'pikachu-hp-bar',
-                                    className: `hp-bar h-4 rounded-full transition-all duration-500 ${getHPBarColor(gameState.pikachu.currentHP, gameState.pikachu.maxHP)}`,
-                                    style: { width: `${(gameState.pikachu.currentHP / gameState.pikachu.maxHP) * 100}%` }
+                                    key: 'player-hp-bar',
+                                    className: `hp-bar h-4 rounded-full transition-all duration-500 ${getHPBarColor(getCurrentPokemon('playerPokemon').currentHP, getCurrentPokemon('playerPokemon').maxHP)}`,
+                                    style: { width: `${(getCurrentPokemon('playerPokemon').currentHP / getCurrentPokemon('playerPokemon').maxHP) * 100}%` }
                                 }))
                             ])
                         ]),
 
-                        // イーブイ（CPU）
+                        // 敵ポケモン
                         React.createElement('div', {
-                            key: 'eevee-section',
-                            className: `text-center slide-in-right ${gameState.animationState.eeveeShake ? 'shake' : ''} ${gameState.animationState.eeveeFlash ? 'flash' : ''}`
+                            key: 'enemy-section',
+                            className: `text-center slide-in-right ${gameState.animationState[`${gameState.enemyPokemon}Shake`] ? 'shake' : ''} ${gameState.animationState[`${gameState.enemyPokemon}Flash`] ? 'flash' : ''}`
                         }, [
-                            React.createElement('h2', {
-                                key: 'eevee-name',
-                                className: 'text-2xl font-bold text-amber-400 mb-2'
-                            }, `${gameState.eevee.name} (CPU)`),
                             React.createElement('div', {
-                                key: 'eevee-type',
+                                key: 'enemy-header',
+                                className: 'flex justify-between items-center mb-4'
+                            }, [
+                                React.createElement('h2', {
+                                    key: 'enemy-name',
+                                    className: 'text-2xl font-bold text-amber-400'
+                                }, `${getCurrentPokemon('enemyPokemon').name} (CPU)`),
+                                React.createElement('button', {
+                                    key: 'change-enemy',
+                                    onClick: () => setGameState(prev => ({ ...prev, showPokemonSelector: true, selectorMode: "enemy" })),
+                                    className: 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm'
+                                }, '変更')
+                            ]),
+                            React.createElement('div', {
+                                key: 'enemy-type',
                                 className: 'inline-block bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-bold mb-4'
-                            }, gameState.eevee.type + 'タイプ'),
+                            }, getCurrentPokemon('enemyPokemon').type + 'タイプ'),
                             React.createElement('img', {
-                                key: 'eevee-image',
-                                src: gameState.eevee.image,
-                                alt: gameState.eevee.name,
+                                key: 'enemy-image',
+                                src: getCurrentPokemon('enemyPokemon').image,
+                                alt: getCurrentPokemon('enemyPokemon').name,
                                 className: 'w-32 h-32 mx-auto mb-4 bounce',
                                 style: { imageRendering: 'pixelated' }
                             }),
                             // HP表示
                             React.createElement('div', {
-                                key: 'eevee-hp',
+                                key: 'enemy-hp',
                                 className: 'mb-4'
                             }, [
                                 React.createElement('div', {
-                                    key: 'eevee-hp-text',
+                                    key: 'enemy-hp-text',
                                     className: 'text-white font-bold mb-2'
-                                }, `HP: ${gameState.eevee.currentHP}/${gameState.eevee.maxHP}`),
+                                }, `HP: ${getCurrentPokemon('enemyPokemon').currentHP}/${getCurrentPokemon('enemyPokemon').maxHP}`),
                                 React.createElement('div', {
-                                    key: 'eevee-hp-bar-bg',
+                                    key: 'enemy-hp-bar-bg',
                                     className: 'w-full bg-gray-700 rounded-full h-4'
                                 }, React.createElement('div', {
-                                    key: 'eevee-hp-bar',
-                                    className: `hp-bar h-4 rounded-full transition-all duration-500 ${getHPBarColor(gameState.eevee.currentHP, gameState.eevee.maxHP)}`,
-                                    style: { width: `${(gameState.eevee.currentHP / gameState.eevee.maxHP) * 100}%` }
+                                    key: 'enemy-hp-bar',
+                                    className: `hp-bar h-4 rounded-full transition-all duration-500 ${getHPBarColor(getCurrentPokemon('enemyPokemon').currentHP, getCurrentPokemon('enemyPokemon').maxHP)}`,
+                                    style: { width: `${(getCurrentPokemon('enemyPokemon').currentHP / getCurrentPokemon('enemyPokemon').maxHP) * 100}%` }
                                 }))
                             ])
                         ])
@@ -436,30 +756,37 @@
                     React.createElement('div', {
                         key: 'turn-indicator',
                         className: 'text-center mb-6'
-                    }, React.createElement('div', {
-                        key: 'turn-text',
-                        className: `inline-block px-6 py-3 rounded-full font-bold text-lg ${
-                            gameState.isGameOver 
-                                ? 'bg-purple-600 text-white' 
-                                : gameState.currentTurn === 'player' 
-                                    ? 'bg-blue-600 text-white glow' 
+                    }, [
+                        React.createElement('div', {
+                            key: 'turn-text',
+                            className: `inline-block px-6 py-3 rounded-full font-bold text-lg ${gameState.isGameOver
+                                ? 'bg-purple-600 text-white'
+                                : gameState.currentTurn === 'player'
+                                    ? 'bg-blue-600 text-white glow'
                                     : 'bg-red-600 text-white'
-                        }`
-                    }, gameState.isGameOver 
-                        ? `ゲーム終了！${gameState.winner === 'pikachu' ? 'ピカチュウ' : 'イーブイ'}の勝利！`
-                        : gameState.currentTurn === 'player' 
-                            ? 'あなたのターン' 
-                            : 'CPUのターン')),
+                                }`
+                        }, gameState.isGameOver
+                            ? `ゲーム終了！${gameState.winner === gameState.playerPokemon ? getCurrentPokemon('playerPokemon').name : getCurrentPokemon('enemyPokemon').name}の勝利！`
+                            : gameState.currentTurn === 'player'
+                                ? 'あなたのターン'
+                                : 'CPUのターン'),
+                        // 攻撃外れメッセージ
+                        gameState.animationState.battleMessage && React.createElement('div', {
+                            key: 'miss-message',
+                            className: `miss-animation fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 text-6xl font-bold text-red-500 drop-shadow-2xl bg-black/50 px-8 py-4 rounded-lg`
+                        }, gameState.animationState.battleMessage)
+                    ]),
 
                     // 技選択ボタン
                     !gameState.isGameOver && gameState.currentTurn === 'player' && React.createElement('div', {
                         key: 'move-buttons',
                         className: 'grid grid-cols-2 gap-4 mb-6'
-                    }, gameState.pikachu.moves.map((move, index) => 
+                    }, getCurrentPokemon('playerPokemon').moves.map((move, index) =>
                         React.createElement('button', {
                             key: `move-${index}`,
                             onClick: () => playerAttack(index),
-                            className: `p-4 rounded-lg font-bold text-white transition-all duration-200 transform hover:scale-105 active:scale-95 ${getMoveTypeColor(move.type)}`
+                            disabled: getCurrentPokemon('playerPokemon').pp[index] <= 0,
+                            className: `p-4 rounded-lg font-bold text-white transition-all duration-200 transform hover:scale-105 active:scale-95 ${getMoveTypeColor(move.type)} ${getCurrentPokemon('playerPokemon').pp[index] <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`
                         }, [
                             React.createElement('div', {
                                 key: 'move-name',
@@ -468,7 +795,11 @@
                             React.createElement('div', {
                                 key: 'move-details',
                                 className: 'text-sm opacity-80'
-                            }, `${move.type}タイプ・威力${move.power}`)
+                            }, `${move.type}タイプ・威力${move.power}・命中${move.accuracy}%`),
+                            React.createElement('div', {
+                                key: 'move-pp',
+                                className: 'text-xs opacity-60'
+                            }, `PP: ${getCurrentPokemon('playerPokemon').pp[index]}/${move.pp}`)
                         ])
                     )),
 
@@ -484,7 +815,7 @@
                         React.createElement('div', {
                             key: 'log-content',
                             className: 'space-y-1'
-                        }, gameState.battleLog.map((log, index) => 
+                        }, gameState.battleLog.map((log, index) =>
                             React.createElement('div', {
                                 key: `log-${index}`,
                                 className: 'text-gray-300 text-sm'
@@ -501,7 +832,54 @@
                         onClick: resetGame,
                         className: 'bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95'
                     }, 'ゲームリセット'))
-                ])
+                ]),
+
+                // ポケモン選択モーダル
+                gameState.showPokemonSelector && React.createElement('div', {
+                    key: 'pokemon-selector-modal',
+                    className: 'fixed inset-0 pokemon-selector flex items-center justify-center z-50'
+                }, React.createElement('div', {
+                    key: 'selector-content',
+                    className: 'bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto'
+                }, [
+                    React.createElement('h2', {
+                        key: 'selector-title',
+                        className: 'text-2xl font-bold text-gray-800 mb-4 text-center'
+                    }, `${gameState.selectorMode === 'player' ? 'プレイヤー' : 'CPU'}のポケモンを選択`),
+                    React.createElement('div', {
+                        key: 'pokemon-grid',
+                        className: 'grid grid-cols-2 md:grid-cols-4 gap-4'
+                    }, Object.entries(pokemonDatabase).map(([key, pokemon]) =>
+                        React.createElement('div', {
+                            key: `pokemon-${key}`,
+                            onClick: () => selectPokemon(key),
+                            className: `pokemon-card p-4 rounded-lg border-2 border-gray-200 text-center cursor-pointer ${(gameState.selectorMode === 'player' && gameState.playerPokemon === key) ||
+                                (gameState.selectorMode === 'enemy' && gameState.enemyPokemon === key) ? 'selected' : ''
+                                }`
+                        }, [
+                            React.createElement('img', {
+                                key: 'pokemon-img',
+                                src: pokemon.image,
+                                alt: pokemon.name,
+                                className: 'w-16 h-16 mx-auto mb-2',
+                                style: { imageRendering: 'pixelated' }
+                            }),
+                            React.createElement('div', {
+                                key: 'pokemon-name',
+                                className: 'font-bold text-gray-800'
+                            }, pokemon.name),
+                            React.createElement('div', {
+                                key: 'pokemon-type',
+                                className: 'text-sm text-gray-600'
+                            }, pokemon.type + 'タイプ')
+                        ])
+                    )),
+                    React.createElement('button', {
+                        key: 'close-selector',
+                        onClick: () => setGameState(prev => ({ ...prev, showPokemonSelector: false, selectorMode: null })),
+                        className: 'mt-4 w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded'
+                    }, 'キャンセル')
+                ]))
             ]);
         };
 
@@ -509,4 +887,5 @@
         ReactDOM.render(React.createElement(PokemonBattleComponent), document.getElementById('root'));
     </script>
 </body>
+
 </html>
