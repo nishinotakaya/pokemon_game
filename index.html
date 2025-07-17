@@ -16,6 +16,9 @@
     <!-- Babel Standalone -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <style>
         /* バトルアニメーション定義 */
         @keyframes shake {
@@ -225,6 +228,123 @@
 
     <script type="text/babel">
         const PokemonBattleComponent = () => {
+            /* === BGM 状態管理 (YouTube) === */
+            const [bgmState, setBgmState] = React.useState({ isPlaying: false, volume: 0.3 });
+            const playerRef = React.useRef(null);
+
+            /* ---- YouTube IFrame API 初期化 ---- */
+            React.useEffect(() => {
+                // YouTube APIが読み込まれているかチェック
+                if (typeof YT === 'undefined') {
+                    console.log('YouTube API not loaded yet');
+                    return;
+                }
+
+                const initYouTubePlayer = () => {
+                    try {
+                        playerRef.current = new YT.Player('yt-player', {
+                            videoId: 'Q53CDIGPJ58',
+                            height: '0',
+                            width: '0',
+                            playerVars: {
+                                start: 408,          // 6分48秒
+                                end: 489,            // 8分9秒
+                                loop: 1,
+                                playlist: 'Q53CDIGPJ58',
+                                controls: 0,
+                                disablekb: 1,
+                                rel: 0,
+                                playsinline: 1,
+                                autoplay: 0,
+                                mute: 0
+                            },
+                            events: {
+                                onReady: (event) => {
+                                    console.log('YouTube player ready');
+                                    event.target.setVolume(bgmState.volume * 100);
+                                    // プレイヤーが準備できたことを示すフラグ
+                                    window.youtubePlayerReady = true;
+                                },
+                                onStateChange: (event) => {
+                                    console.log('YouTube player state changed:', event.data);
+                                    // 状態: -1=未開始, 0=終了, 1=再生中, 2=一時停止, 3=バッファリング, 5=挿入済み
+                                    if (event.data === YT.PlayerState.ENDED) {
+                                        // 8分9秒で終了したら6分48秒に戻ってループ
+                                        event.target.seekTo(408);
+                                        event.target.playVideo();
+                                    }
+                                },
+                                onError: (event) => {
+                                    console.log('YouTube player error:', event.data);
+                                    window.youtubePlayerReady = false;
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        console.log('YouTube player creation error:', error);
+                    }
+                };
+
+                // YouTube APIが準備できたら初期化
+                if (YT && YT.Player) {
+                    initYouTubePlayer();
+                } else {
+                    window.onYouTubeIframeAPIReady = initYouTubePlayer;
+                }
+            }, []);
+
+            /* ---- BGM 再生/停止 トグル ---- */
+            const toggleBGM = () => {
+                const player = playerRef.current;
+                if (!player) {
+                    console.log('YouTube player not ready');
+                    return;
+                }
+
+                try {
+                    if (bgmState.isPlaying) {
+                        console.log('Pausing BGM');
+                        player.pauseVideo();
+                        setBgmState(prev => ({ ...prev, isPlaying: false }));
+                    } else {
+                        console.log('Starting BGM');
+                        // プレイヤーが準備できているか確認
+                        if (player.getPlayerState && player.getPlayerState() !== -1) {
+                            player.seekTo(408, true);
+                            player.setVolume(bgmState.volume * 100);
+                            player.playVideo();
+                            setBgmState(prev => ({ ...prev, isPlaying: true }));
+                        } else {
+                            console.log('Player not ready, retrying...');
+                            // 少し待ってから再試行
+                            setTimeout(() => {
+                                if (player.getPlayerState && player.getPlayerState() !== -1) {
+                                    player.seekTo(408, true);
+                                    player.setVolume(bgmState.volume * 100);
+                                    player.playVideo();
+                                    setBgmState(prev => ({ ...prev, isPlaying: true }));
+                                }
+                            }, 1000);
+                        }
+                    }
+                } catch (error) {
+                    console.log('BGM toggle error:', error);
+                }
+            };
+
+            /* ---- 音量調整 ---- */
+            const adjustVolume = (newVolume) => {
+                const player = playerRef.current;
+                if (player) {
+                    try {
+                        player.setVolume(newVolume * 100);
+                    } catch (error) {
+                        console.log('Volume adjust error:', error);
+                    }
+                }
+                setBgmState(prev => ({ ...prev, volume: newVolume }));
+            };
+
             // ポケモンデータベース
             const pokemonDatabase = {
                 pikachu: {
@@ -421,6 +541,26 @@
 
                 if (result.message === "miss") {
                     addToBattleLog(`${attacker.name}の攻撃は外れた！`);
+                    // 攻撃外れ効果音（Web Audio API）
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    } catch (error) {
+                        console.log('Miss sound error:', error);
+                    }
                     // 攻撃外れアニメーション
                     setGameState(prev => ({
                         ...prev,
@@ -454,15 +594,55 @@
                     triggerAnimation("shake", defenderAnimationTarget, 500);
                 }, 200);
 
-                // 効果メッセージ
+                // 効果メッセージと効果音
                 if (result.critical) {
                     addToBattleLog("クリティカルヒット！");
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.3);
+                    } catch (error) {
+                        console.log('Critical sound error:', error);
+                    }
                 }
 
                 if (result.message === "super_effective") {
                     addToBattleLog("効果は抜群だ！");
                 } else if (result.message === "not_very_effective") {
                     addToBattleLog("効果は今ひとつ...");
+                }
+
+                // 攻撃効果音
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                } catch (error) {
+                    console.log('Attack sound error:', error);
                 }
 
                 addToBattleLog(`${defender.name}に${result.damage}ダメージ！`);
@@ -480,6 +660,34 @@
                     if (newDefenderHP <= 0) {
                         newState.isGameOver = true;
                         newState.winner = attackerKey;
+                        // 勝利効果音
+                        try {
+                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                            // 勝利ファンファーレ
+                            const createNote = (freq, time, duration) => {
+                                const oscillator = audioContext.createOscillator();
+                                const gainNode = audioContext.createGain();
+
+                                oscillator.connect(gainNode);
+                                gainNode.connect(audioContext.destination);
+
+                                oscillator.type = 'sine';
+                                oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + time);
+
+                                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + time);
+                                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + time + duration);
+
+                                oscillator.start(audioContext.currentTime + time);
+                                oscillator.stop(audioContext.currentTime + time + duration);
+                            };
+
+                            createNote(523, 0, 0.2);    // C5
+                            createNote(659, 0.2, 0.2);  // E5
+                            createNote(784, 0.4, 0.4);  // G5
+                        } catch (error) {
+                            console.log('Victory sound error:', error);
+                        }
                         setTimeout(() => {
                             addToBattleLog(`${defender.name}は倒れた！`);
                             addToBattleLog(`${attacker.name}の勝利！`);
@@ -638,7 +846,48 @@
                     React.createElement('p', {
                         key: 'subtitle',
                         className: 'text-lg text-white drop-shadow-md'
-                    }, `${getCurrentPokemon('playerPokemon').name} vs ${getCurrentPokemon('enemyPokemon').name}`)
+                    }, `${getCurrentPokemon('playerPokemon').name} vs ${getCurrentPokemon('enemyPokemon').name}`),
+                    // BGM制御
+                    React.createElement('div', {
+                        key: 'bgm-controls',
+                        className: 'flex justify-center items-center gap-4 mt-4'
+                    }, [
+                        React.createElement('button', {
+                            key: 'toggle-bgm',
+                            onClick: toggleBGM,
+                            className: `px-4 py-2 rounded-lg font-bold transition-all duration-200 ${bgmState.isPlaying
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                                }`
+                        }, bgmState.isPlaying ? '🔇 BGM停止' : '🔊 BGM開始'),
+                        React.createElement('div', {
+                            key: 'player-status',
+                            className: 'text-white text-xs'
+                        }, window.youtubePlayerReady ? 'YouTube準備完了' : 'YouTube読み込み中...'),
+                        React.createElement('div', {
+                            key: 'volume-control',
+                            className: 'flex items-center gap-2'
+                        }, [
+                            React.createElement('span', {
+                                key: 'volume-label',
+                                className: 'text-white text-sm'
+                            }, '音量:'),
+                            React.createElement('input', {
+                                key: 'volume-slider',
+                                type: 'range',
+                                min: '0',
+                                max: '1',
+                                step: '0.1',
+                                value: bgmState.volume,
+                                onChange: (e) => adjustVolume(parseFloat(e.target.value)),
+                                className: 'w-24'
+                            })
+                        ]),
+                        React.createElement('div', {
+                            key: 'audio-hint',
+                            className: 'text-white text-xs opacity-70'
+                        }, '※YouTube BGM使用 - 6分48秒〜8分9秒をループ再生 - 外部エラーは無視してください')
+                    ])
                 ]),
 
                 // メインバトルエリア
@@ -646,6 +895,13 @@
                     key: 'battle-area',
                     className: 'max-w-6xl mx-auto bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-2xl'
                 }, [
+                    // YouTubeプレイヤー（非表示）
+                    React.createElement('div', {
+                        key: 'youtube-player',
+                        id: 'yt-player',
+                        style: { position: 'absolute', left: '-9999px', top: '-9999px' }
+                    })
+                ], [
                     // ポケモン表示エリア
                     React.createElement('div', {
                         key: 'pokemon-area',
