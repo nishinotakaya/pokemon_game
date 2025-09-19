@@ -19,6 +19,11 @@
     <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
+    <!-- ポケモンデータ -->
+    <script src="pokemon-data.js"></script>
+    <script src="move-data.js"></script>
+    <script src="type-effectiveness.js"></script>
+
     <style>
         /* バトルアニメーション定義 */
         @keyframes shake {
@@ -345,18 +350,19 @@
                 setBgmState(prev => ({ ...prev, volume: newVolume }));
             };
 
-            // ポケモンデータベース
-            const pokemonDatabase = {
+            // ポケモンデータベース（外部ファイルから読み込み）
+            const pokemonDatabase = window.pokemonDatabase || {
+                // フォールバック用の基本ポケモン
                 pikachu: {
                     name: "ピカチュウ",
                     maxHP: 100,
                     type: "でんき",
                     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
                     moves: [
-                        { name: "でんきショック", power: 25, type: "でんき", accuracy: 95, pp: 15 },
-                        { name: "アイアンテール", power: 35, type: "はがね", accuracy: 85, pp: 10 },
-                        { name: "でんこうせっか", power: 20, type: "ノーマル", accuracy: 90, pp: 20 },
-                        { name: "10まんボルト", power: 45, type: "でんき", accuracy: 80, pp: 8 }
+                        { name: "でんきショック", power: 40, type: "でんき", accuracy: 100, pp: 30 },
+                        { name: "でんこうせっか", power: 40, type: "ノーマル", accuracy: 100, pp: 30 },
+                        { name: "10まんボルト", power: 90, type: "でんき", accuracy: 100, pp: 15 },
+                        { name: "かみなり", power: 110, type: "でんき", accuracy: 70, pp: 10 }
                     ],
                     stats: { attack: 55, defense: 40, speed: 90, special: 50 }
                 },
@@ -366,71 +372,63 @@
                     type: "ノーマル",
                     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png",
                     moves: [
-                        { name: "でんこうせっか", power: 20, type: "ノーマル", accuracy: 90, pp: 20 },
-                        { name: "しっぽをふる", power: 15, type: "ノーマル", accuracy: 95, pp: 25 },
-                        { name: "とっしん", power: 30, type: "ノーマル", accuracy: 85, pp: 15 },
-                        { name: "かみなり", power: 40, type: "でんき", accuracy: 75, pp: 10 }
+                        { name: "でんこうせっか", power: 40, type: "ノーマル", accuracy: 100, pp: 30 },
+                        { name: "しっぽをふる", power: 0, type: "ノーマル", accuracy: 100, pp: 30 },
+                        { name: "とっしん", power: 90, type: "ノーマル", accuracy: 85, pp: 20 },
+                        { name: "はねる", power: 0, type: "ノーマル", accuracy: 100, pp: 40 }
                     ],
                     stats: { attack: 55, defense: 50, speed: 55, special: 45 }
-                },
-                squirtle: {
-                    name: "ゼニガメ",
-                    maxHP: 100,
-                    type: "みず",
-                    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
-                    moves: [
-                        { name: "水てっぽう", power: 30, type: "みず", accuracy: 90, pp: 15 },
-                        { name: "からにこもる", power: 10, type: "じめん", accuracy: 95, pp: 20 },
-                        { name: "メガトンパンチ", power: 40, type: "かくとう", accuracy: 80, pp: 12 },
-                        { name: "なみのり", power: 40, type: "みず", accuracy: 85, pp: 10 }
-                    ],
-                    stats: { attack: 48, defense: 65, speed: 43, special: 50 }
-                },
-                diglett: {
-                    name: "ディグダ",
-                    maxHP: 100,
-                    type: "じめん",
-                    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/50.png",
-                    moves: [
-                        { name: "じしん", power: 35, type: "じめん", accuracy: 85, pp: 12 },
-                        { name: "じわれ", power: 30, type: "じめん", accuracy: 90, pp: 15 },
-                        { name: "たいあたり", power: 25, type: "ノーマル", accuracy: 95, pp: 18 },
-                        { name: "すなかけ", power: 20, type: "じめん", accuracy: 85, pp: 20 }
-                    ],
-                    stats: { attack: 55, defense: 25, speed: 95, special: 35 }
                 }
             };
 
+            // 初期ポケモンデータの準備
+            const initializePokemonData = () => {
+                const initialData = {};
+                Object.keys(pokemonDatabase).forEach(key => {
+                    const pokemon = pokemonDatabase[key];
+                    initialData[key] = {
+                        ...pokemon,
+                        currentHP: pokemon.maxHP,
+                        status: null,
+                        pp: pokemon.moves.reduce((acc, move, index) => {
+                            acc[index] = move.pp;
+                            return acc;
+                        }, {})
+                    };
+                });
+                return initialData;
+            };
+
             // 状態管理
-            const [gameState, setGameState] = React.useState({
-                playerPokemon: "pikachu",
-                enemyPokemon: "eevee",
-                pikachu: { ...pokemonDatabase.pikachu, currentHP: 100, status: null, pp: { 0: 15, 1: 10, 2: 20, 3: 8 } },
-                eevee: { ...pokemonDatabase.eevee, currentHP: 100, status: null, pp: { 0: 20, 1: 25, 2: 15, 3: 10 } },
-                squirtle: { ...pokemonDatabase.squirtle, currentHP: 100, status: null, pp: { 0: 15, 1: 20, 2: 12, 3: 10 } },
-                diglett: { ...pokemonDatabase.diglett, currentHP: 100, status: null, pp: { 0: 12, 1: 15, 2: 18, 3: 20 } },
-                currentTurn: "player",
-                battleLog: [],
-                isGameOver: false,
-                winner: null,
-                showPokemonSelector: false,
-                selectorMode: null, // "player" or "enemy"
-                animationState: {
-                    pikachuShake: false,
-                    eeveeShake: false,
-                    squirtleShake: false,
-                    diglettShake: false,
-                    pikachuFlash: false,
-                    eeveeFlash: false,
-                    squirtleFlash: false,
-                    diglettFlash: false,
-                    criticalHit: false,
-                    battleMessage: ""
-                }
+            const [gameState, setGameState] = React.useState(() => {
+                const pokemonData = initializePokemonData();
+                return {
+                    playerPokemon: "pikachu",
+                    enemyPokemon: "eevee",
+                    ...pokemonData,
+                    currentTurn: "player",
+                    battleLog: [],
+                    isGameOver: false,
+                    winner: null,
+                    showPokemonSelector: false,
+                    selectorMode: null, // "player" or "enemy"
+                    animationState: {
+                        pikachuShake: false,
+                        eeveeShake: false,
+                        squirtleShake: false,
+                        diglettShake: false,
+                        pikachuFlash: false,
+                        eeveeFlash: false,
+                        squirtleFlash: false,
+                        diglettFlash: false,
+                        criticalHit: false,
+                        battleMessage: ""
+                    }
+                };
             });
 
-            // 詳細なタイプ相性チャート
-            const typeEffectiveness = {
+            // タイプ相性チャート（外部ファイルから読み込み）
+            const typeEffectiveness = window.typeEffectiveness || {
                 'でんき': { 'みず': 2.0, 'じめん': 0.0, 'ノーマル': 1.0, 'はがね': 0.5 },
                 'みず': { 'じめん': 2.0, 'でんき': 0.5, 'ノーマル': 1.0, 'はがね': 1.0 },
                 'じめん': { 'でんき': 2.0, 'みず': 0.5, 'ノーマル': 1.0, 'はがね': 2.0 },
@@ -759,13 +757,35 @@
             const selectPokemon = (pokemonKey) => {
                 setGameState(prev => {
                     const newState = { ...prev };
+                    const pokemonData = pokemonDatabase[pokemonKey];
+
+                    if (!pokemonData) {
+                        console.error(`Pokemon data not found: ${pokemonKey}`);
+                        return prev;
+                    }
 
                     if (prev.selectorMode === "player") {
                         newState.playerPokemon = pokemonKey;
-                        newState[gameState.playerPokemon] = { ...pokemonDatabase[gameState.playerPokemon], currentHP: 100, status: null, pp: { 0: 15, 1: 10, 2: 20, 3: 8 } };
+                        newState[pokemonKey] = {
+                            ...pokemonData,
+                            currentHP: pokemonData.maxHP,
+                            status: null,
+                            pp: pokemonData.moves.reduce((acc, move, index) => {
+                                acc[index] = move.pp;
+                                return acc;
+                            }, {})
+                        };
                     } else if (prev.selectorMode === "enemy") {
                         newState.enemyPokemon = pokemonKey;
-                        newState[gameState.enemyPokemon] = { ...pokemonDatabase[gameState.enemyPokemon], currentHP: 100, status: null, pp: { 0: 20, 1: 25, 2: 15, 3: 10 } };
+                        newState[pokemonKey] = {
+                            ...pokemonData,
+                            currentHP: pokemonData.maxHP,
+                            status: null,
+                            pp: pokemonData.moves.reduce((acc, move, index) => {
+                                acc[index] = move.pp;
+                                return acc;
+                            }, {})
+                        };
                     }
 
                     newState.showPokemonSelector = false;
@@ -776,32 +796,45 @@
 
             // ゲームリセット関数
             const resetGame = () => {
-                setGameState(prev => ({
-                    ...prev,
-                    [prev.playerPokemon]: { ...pokemonDatabase[prev.playerPokemon], currentHP: 100, status: null, pp: { 0: 15, 1: 10, 2: 20, 3: 8 } },
-                    [prev.enemyPokemon]: { ...pokemonDatabase[prev.enemyPokemon], currentHP: 100, status: null, pp: { 0: 20, 1: 25, 2: 15, 3: 10 } },
-                    currentTurn: "player",
-                    battleLog: ["バトル開始！"],
-                    isGameOver: false,
-                    winner: null,
-                    animationState: {
-                        pikachuShake: false,
-                        eeveeShake: false,
-                        squirtleShake: false,
-                        diglettShake: false,
-                        pikachuFlash: false,
-                        eeveeFlash: false,
-                        squirtleFlash: false,
-                        diglettFlash: false,
-                        criticalHit: false,
-                        battleMessage: ""
-                    }
-                }));
+                setGameState(prev => {
+                    const pokemonData = initializePokemonData();
+                    return {
+                        ...prev,
+                        ...pokemonData,
+                        currentTurn: "player",
+                        battleLog: ["バトル開始！"],
+                        isGameOver: false,
+                        winner: null,
+                        animationState: {
+                            pikachuShake: false,
+                            eeveeShake: false,
+                            squirtleShake: false,
+                            diglettShake: false,
+                            pikachuFlash: false,
+                            eeveeFlash: false,
+                            squirtleFlash: false,
+                            diglettFlash: false,
+                            criticalHit: false,
+                            battleMessage: ""
+                        }
+                    };
+                });
             };
 
             // 初期化
             React.useEffect(() => {
-                resetGame();
+                // ポケモンデータベースが読み込まれるまで待機
+                if (window.pokemonDatabase && Object.keys(window.pokemonDatabase).length > 0) {
+                    resetGame();
+                } else {
+                    // データベースが読み込まれていない場合は少し待ってから再試行
+                    const timer = setTimeout(() => {
+                        if (window.pokemonDatabase && Object.keys(window.pokemonDatabase).length > 0) {
+                            resetGame();
+                        }
+                    }, 100);
+                    return () => clearTimeout(timer);
+                }
             }, []);
 
             // HPバーの色を決定する関数
@@ -812,22 +845,55 @@
                 return 'bg-red-500';
             };
 
-            // 技タイプ別の色を決定する関数
+            // 技タイプ別の色を決定する関数（外部ファイルから読み込み）
             const getMoveTypeColor = (type) => {
-                const colors = {
+                const colors = window.typeColors || {
                     'でんき': 'bg-yellow-400 hover:bg-yellow-500',
                     'はがね': 'bg-gray-400 hover:bg-gray-500',
                     'ノーマル': 'bg-gray-300 hover:bg-gray-400 text-gray-800',
                     'じめん': 'bg-amber-600 hover:bg-amber-700',
                     'かくとう': 'bg-red-600 hover:bg-red-700',
-                    'みず': 'bg-blue-500 hover:bg-blue-600'
+                    'みず': 'bg-blue-500 hover:bg-blue-600',
+                    'ほのお': 'bg-red-500 hover:bg-red-600',
+                    'エスパー': 'bg-purple-500 hover:bg-purple-600',
+                    'くさ': 'bg-green-500 hover:bg-green-600',
+                    'こおり': 'bg-cyan-300 hover:bg-cyan-400 text-black',
+                    'どく': 'bg-purple-600 hover:bg-purple-700',
+                    'ひこう': 'bg-indigo-400 hover:bg-indigo-500',
+                    'むし': 'bg-lime-500 hover:bg-lime-600',
+                    'いわ': 'bg-stone-500 hover:bg-stone-600',
+                    'ゴースト': 'bg-violet-600 hover:bg-violet-700',
+                    'ドラゴン': 'bg-indigo-600 hover:bg-indigo-700',
+                    'あく': 'bg-gray-800 hover:bg-gray-900',
+                    'フェアリー': 'bg-pink-300 hover:bg-pink-400 text-black'
                 };
                 return colors[type] || 'bg-blue-500 hover:bg-blue-600';
             };
 
-            // 現在のポケモンを取得
+            // 現在のポケモンを取得（安全な取得）
             const getCurrentPokemon = (key) => {
-                return gameState[gameState[key]];
+                const pokemonKey = gameState[key];
+                const pokemon = gameState[pokemonKey];
+                if (!pokemon) {
+                    console.error(`Pokemon not found: ${pokemonKey}`);
+                    // フォールバック用のデフォルトポケモンを返す
+                    return {
+                        name: "ピカチュウ",
+                        maxHP: 100,
+                        currentHP: 100,
+                        type: "でんき",
+                        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
+                        moves: [
+                            { name: "でんきショック", power: 40, type: "でんき", accuracy: 100, pp: 30 },
+                            { name: "でんこうせっか", power: 40, type: "ノーマル", accuracy: 100, pp: 30 },
+                            { name: "10まんボルト", power: 90, type: "でんき", accuracy: 100, pp: 15 },
+                            { name: "かみなり", power: 110, type: "でんき", accuracy: 70, pp: 10 }
+                        ],
+                        stats: { attack: 55, defense: 40, speed: 90, special: 50 },
+                        pp: { 0: 30, 1: 30, 2: 15, 3: 10 }
+                    };
+                }
+                return pokemon;
             };
 
             // UI レンダリング
