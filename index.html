@@ -523,28 +523,43 @@
                     return;
                 }
 
-                // 現在のHPを保持
-                const currentHP = currentPokemon.currentHP;
+                // 現在のHPを保持（安全に取得）
+                const currentHP = currentPokemon.currentHP || currentPokemon.maxHP || 100;
 
                 // ポケモンを変更（HPはそのまま、技とPPは新しいポケモンのもの）
                 setGameState(prev => {
+                    // 現在のポケモンデータを取得
+                    const attackerPokemonKey = prev[attackerKey];
+                    const attackerPokemon = prev[attackerPokemonKey];
+
+                    if (!attackerPokemon) {
+                        console.error(`Attacker pokemon not found: ${attackerPokemonKey}`);
+                        return prev;
+                    }
+
+                    // 新しいポケモンデータを作成（HPは現在のHPを保持）
+                    const newPokemonData = {
+                        ...transformPokemon,
+                        currentHP: currentHP, // 現在のHPを保持
+                        status: null,
+                        pp: transformPokemon.moves.reduce((acc, move, index) => {
+                            acc[index] = move.pp;
+                            return acc;
+                        }, {})
+                    };
+
+                    // 新しい状態を作成（既存のポケモンデータを保持し、新しいポケモンデータのみ追加）
                     const newState = {
                         ...prev,
                         [attackerKey]: randomPokemonKey,
-                        [randomPokemonKey]: {
-                            ...transformPokemon,
-                            currentHP: currentHP, // HPはそのまま
-                            status: null,
-                            pp: transformPokemon.moves.reduce((acc, move, index) => {
-                                acc[index] = move.pp;
-                                return acc;
-                            }, {})
-                        },
                         battleLog: [
                             ...prev.battleLog.slice(-4),
                             `${currentPokemon.name}は${transformPokemon.name}にへんしんした！`
                         ]
                     };
+
+                    // 新しいポケモンデータを追加（既存のデータを上書きしない）
+                    newState[randomPokemonKey] = newPokemonData;
 
                     // バトルログに追加
                     setTimeout(() => {
@@ -763,7 +778,8 @@
 
                     if (newDefenderHP <= 0) {
                         newState.isGameOver = true;
-                        newState.winner = attackerKey;
+                        // 勝者を正しく設定（attackerKeyではなく、実際のポケモンキー）
+                        newState.winner = prev[attackerKey];
                         // 勝利効果音
                         try {
                             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -979,6 +995,25 @@
             // 現在のポケモンを取得（安全な取得）
             const getCurrentPokemon = (key) => {
                 const pokemonKey = gameState[key];
+                if (!pokemonKey) {
+                    console.error(`Pokemon key not found: ${key}`);
+                    return {
+                        name: "ピカチュウ",
+                        maxHP: 100,
+                        currentHP: 100,
+                        type: "でんき",
+                        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
+                        moves: [
+                            { name: "でんきショック", power: 40, type: "でんき", accuracy: 100, pp: 30 },
+                            { name: "でんこうせっか", power: 40, type: "ノーマル", accuracy: 100, pp: 30 },
+                            { name: "10まんボルト", power: 90, type: "でんき", accuracy: 100, pp: 15 },
+                            { name: "かみなり", power: 110, type: "でんき", accuracy: 70, pp: 10 }
+                        ],
+                        stats: { attack: 55, defense: 40, speed: 90, special: 50 },
+                        pp: { 0: 30, 1: 30, 2: 15, 3: 10 }
+                    };
+                }
+
                 const pokemon = gameState[pokemonKey];
                 if (!pokemon) {
                     console.error(`Pokemon not found: ${pokemonKey}`);
@@ -999,6 +1034,12 @@
                         pp: { 0: 30, 1: 30, 2: 15, 3: 10 }
                     };
                 }
+
+                // HPの整合性をチェック
+                if (pokemon.currentHP === undefined || pokemon.currentHP < 0) {
+                    pokemon.currentHP = pokemon.maxHP || 100;
+                }
+
                 return pokemon;
             };
 
