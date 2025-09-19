@@ -439,6 +439,11 @@
 
             // ダメージ計算関数（よりリアル）
             const calculateDamage = (move, attacker, defender) => {
+                // 安全チェック
+                if (!move || !attacker || !defender) {
+                    return { damage: 0, critical: false, effectiveness: 1.0, message: "miss" };
+                }
+
                 // 命中率判定
                 const hitChance = Math.random() * 100;
                 if (hitChance > move.accuracy) {
@@ -449,9 +454,9 @@
                 const isCritical = Math.random() < 0.0625;
                 const criticalMultiplier = isCritical ? 1.5 : 1.0;
 
-                // 基本ダメージ計算
-                const attackStat = attacker.stats.attack;
-                const defenseStat = defender.stats.defense;
+                // 基本ダメージ計算（安全チェック付き）
+                const attackStat = attacker.stats?.attack || 50;
+                const defenseStat = defender.stats?.defense || 50;
                 const baseDamage = Math.floor(((2 * 50 / 5 + 2) * move.power * attackStat / defenseStat) / 50 + 2);
 
                 // ランダム要素（0.85-1.0倍）
@@ -502,17 +507,100 @@
                 }));
             };
 
+            // へんしん技を実行する関数
+            const performTransform = (attackerKey) => {
+                const pokemonKeys = Object.keys(pokemonDatabase);
+                const currentPokemon = getCurrentPokemon(attackerKey);
+                const currentPokemonKey = gameState[attackerKey];
+
+                // 現在のポケモン以外からランダムに選択
+                const availablePokemon = pokemonKeys.filter(key => key !== currentPokemonKey);
+                const randomPokemonKey = availablePokemon[Math.floor(Math.random() * availablePokemon.length)];
+                const transformPokemon = pokemonDatabase[randomPokemonKey];
+
+                if (!transformPokemon) {
+                    addToBattleLog("へんしんに失敗した！");
+                    return;
+                }
+
+                // 現在のHPを保持
+                const currentHP = currentPokemon.currentHP;
+
+                // ポケモンを変更（HPはそのまま、技とPPは新しいポケモンのもの）
+                setGameState(prev => {
+                    const newState = {
+                        ...prev,
+                        [attackerKey]: randomPokemonKey,
+                        [randomPokemonKey]: {
+                            ...transformPokemon,
+                            currentHP: currentHP, // HPはそのまま
+                            status: null,
+                            pp: transformPokemon.moves.reduce((acc, move, index) => {
+                                acc[index] = move.pp;
+                                return acc;
+                            }, {})
+                        },
+                        battleLog: [
+                            ...prev.battleLog.slice(-4),
+                            `${currentPokemon.name}は${transformPokemon.name}にへんしんした！`
+                        ]
+                    };
+
+                    // バトルログに追加
+                    setTimeout(() => {
+                        addToBattleLog(`${transformPokemon.name}の技に変わった！`);
+                    }, 100);
+
+                    return newState;
+                });
+            };
+
             // 攻撃処理関数（よりリアル）
             const performAttack = (attackerKey, defenderKey, moveIndex) => {
                 if (gameState.isGameOver) return;
 
-                const attacker = gameState[attackerKey];
-                const defender = gameState[defenderKey];
+                const attacker = getCurrentPokemon(attackerKey);
+                const defender = getCurrentPokemon(defenderKey);
                 const move = attacker.moves[moveIndex];
 
                 // PPチェック
                 if (attacker.pp[moveIndex] <= 0) {
                     addToBattleLog(`${attacker.name}の${move.name}のPPが足りない！`);
+                    return;
+                }
+
+                // へんしん技の特別処理
+                if (move.name === "へんしん") {
+                    // PPを減らす
+                    setGameState(prev => {
+                        const attackerPokemonKey = prev[attackerKey];
+                        const attackerPokemon = prev[attackerPokemonKey];
+
+                        if (!attackerPokemon || !attackerPokemon.pp) {
+                            console.error(`Attacker pokemon not found: ${attackerPokemonKey}`);
+                            return prev;
+                        }
+
+                        return {
+                            ...prev,
+                            [attackerPokemonKey]: {
+                                ...attackerPokemon,
+                                pp: {
+                                    ...attackerPokemon.pp,
+                                    [moveIndex]: attackerPokemon.pp[moveIndex] - 1
+                                }
+                            }
+                        };
+                    });
+
+                    // へんしんを実行
+                    performTransform(attackerKey);
+
+                    // ターン終了
+                    setGameState(prev => ({
+                        ...prev,
+                        currentTurn: prev.currentTurn === "player" ? "enemy" : "player"
+                    }));
                     return;
                 }
 
@@ -523,16 +611,26 @@
                 triggerAnimation("flash", attackerAnimationTarget, 300);
 
                 // PP消費
-                setGameState(prev => ({
-                    ...prev,
-                    [attackerKey]: {
-                        ...prev[attackerKey],
-                        pp: {
-                            ...prev[attackerKey].pp,
-                            [moveIndex]: prev[attackerKey].pp[moveIndex] - 1
-                        }
+                setGameState(prev => {
+                    const attackerPokemonKey = prev[attackerKey];
+                    const attackerPokemon = prev[attackerPokemonKey];
+
+                    if (!attackerPokemon || !attackerPokemon.pp) {
+                        console.error(`Attacker pokemon not found: ${attackerPokemonKey}`);
+                        return prev;
                     }
-                }));
+
+                    return {
+                        ...prev,
+                        [attackerPokemonKey]: {
+                            ...attackerPokemon,
+                            pp: {
+                                ...attackerPokemon.pp,
+                                [moveIndex]: attackerPokemon.pp[moveIndex] - 1
+                            }
+                        }
+                    };
+                });
 
                 // バトルログ更新
                 addToBattleLog(`${attacker.name}の${move.name}！`);
@@ -647,10 +745,18 @@
 
                 // HP更新とゲーム状態更新
                 setGameState(prev => {
+                    const defenderPokemonKey = prev[defenderKey];
+                    const defenderPokemon = prev[defenderPokemonKey];
+
+                    if (!defenderPokemon) {
+                        console.error(`Defender pokemon not found: ${defenderPokemonKey}`);
+                        return prev;
+                    }
+
                     const newState = {
                         ...prev,
-                        [defenderKey]: {
-                            ...prev[defenderKey],
+                        [defenderPokemonKey]: {
+                            ...defenderPokemon,
                             currentHP: newDefenderHP
                         }
                     };
@@ -701,15 +807,15 @@
             // プレイヤー攻撃関数
             const playerAttack = (moveIndex) => {
                 if (gameState.currentTurn === "player" && !gameState.isGameOver) {
-                    performAttack(gameState.playerPokemon, gameState.enemyPokemon, moveIndex);
+                    performAttack("playerPokemon", "enemyPokemon", moveIndex);
                 }
             };
 
             // 敵AI攻撃関数（より賢いAI）
             const enemyAttack = () => {
                 if (gameState.currentTurn === "enemy" && !gameState.isGameOver) {
-                    const enemyPokemon = gameState[gameState.enemyPokemon];
-                    const playerPokemon = gameState[gameState.playerPokemon];
+                    const enemyPokemon = getCurrentPokemon("enemyPokemon");
+                    const playerPokemon = getCurrentPokemon("playerPokemon");
 
                     // 利用可能な技をフィルタリング
                     const availableMoves = enemyPokemon.moves.map((move, index) => ({
@@ -741,7 +847,7 @@
                     });
 
                     setTimeout(() => {
-                        performAttack(gameState.enemyPokemon, gameState.playerPokemon, bestMove.index);
+                        performAttack("enemyPokemon", "playerPokemon", bestMove.index);
                     }, 1500);
                 }
             };
