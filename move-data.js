@@ -141,7 +141,9 @@ export const moveDatabase = {
   wink: { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20, description: "ウィンクで相手を魅了し、命中率を下げる" },
   oneHitKO: { name: "四文字がため", power: 200, type: "かくとう", accuracy: 30, pp: 5, description: "当たれば一撃で倒せる強力な技" },
   hipDrop: { name: "ヒップドロップ", power: 85, type: "かくとう", accuracy: 100, pp: 20, description: "ヒップで相手を押しつぶす" },
-  pcAttack: { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15, description: "パソコンを振り回して攻撃する現代的な技" }
+  pcAttack: { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15, description: "パソコンを振り回して攻撃する現代的な技" },
+  enrage: { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15, description: "怒りで攻撃力が2倍になる" },
+  punch: { name: "殴る", power: 70, type: "かくとう", accuracy: 100, pp: 25, description: "シンプルに拳で殴る" }
 };
 
 // 技の効果（状態変化など）

@@ -172,9 +172,9 @@ const pokemonDatabase = {
     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
     moves: [
       { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
-      { name: "サイコブレイク", power: 100, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
       { name: "シャドーボール", power: 80, type: "ゴースト", accuracy: 100, pp: 15 },
-      { name: "あやしいひかり", power: 0, type: "ゴースト", accuracy: 100, pp: 10 }
+      { name: "殴る", power: 70, type: "かくとう", accuracy: 100, pp: 25 }
     ],
     stats: { attack: 110, defense: 90, speed: 130, special: 154 }
   },
@@ -447,6 +447,21 @@ const pokemonDatabase = {
       { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
     ],
     stats: { attack: 90, defense: 70, speed: 95, special: 85 }
+  },
+
+  // あさこし
+  angrymaster: {
+    name: "あさこし",
+    maxHP: 170,
+    type: "かくとう",
+    image: "ええ加減にしよし.png",
+    moves: [
+      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "殴る", power: 70, type: "かくとう", accuracy: 100, pp: 25 },
+      { name: "4文字固め", power: 200, type: "かくとう", accuracy: 30, pp: 5 },
+      { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15 }
+    ],
+    stats: { attack: 140, defense: 70, speed: 80, special: 60 }
   }
 };
 
@@ -457,7 +472,7 @@ window.pokemonDatabase = pokemonDatabase;
 const starterPokemon = [
   'pikachu', 'eevee', 'charmander', 'squirtle', 'bulbasaur',
   'mewtwo', 'mew', 'dragonite', 'snorlax', 'gyarados',
-  'specialfighter', 'machamp', 'jynx', 'pokemontrainer'
+  'specialfighter', 'machamp', 'jynx', 'pokemontrainer', 'angrymaster'
 ];
 
 window.starterPokemon = starterPokemon;
