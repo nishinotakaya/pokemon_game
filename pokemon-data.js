@@ -432,6 +432,21 @@ const pokemonDatabase = {
       { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15 }
     ],
     stats: { attack: 120, defense: 80, speed: 85, special: 70 }
+  },
+
+  // ポケモントレーナー
+  pokemontrainer: {
+    name: "ポケモントレーナー",
+    maxHP: 140,
+    type: "ノーマル",
+    image: "ポケモントレーナー.png",
+    moves: [
+      { name: "でんこうせっか", power: 40, type: "ノーマル", accuracy: 100, pp: 30 },
+      { name: "みずでっぽう", power: 40, type: "みず", accuracy: 100, pp: 25 },
+      { name: "だいもんじ", power: 110, type: "ほのお", accuracy: 85, pp: 5 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
+    ],
+    stats: { attack: 90, defense: 70, speed: 95, special: 85 }
   }
 };
 
@@ -442,7 +457,7 @@ window.pokemonDatabase = pokemonDatabase;
 const starterPokemon = [
   'pikachu', 'eevee', 'charmander', 'squirtle', 'bulbasaur',
   'mewtwo', 'mew', 'dragonite', 'snorlax', 'gyarados',
-  'specialfighter', 'machamp', 'jynx'
+  'specialfighter', 'machamp', 'jynx', 'pokemontrainer'
 ];
 
 window.starterPokemon = starterPokemon;

@@ -262,6 +262,29 @@
         .win-text {
             animation: winPulse 1.5s ease-in-out infinite;
         }
+
+        /* 技名表示アニメーション */
+        @keyframes moveNameAppear {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .move-name-display {
+            animation: moveNameAppear 0.5s ease-out;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 
@@ -460,7 +483,9 @@
                         squirtleFlash: false,
                         diglettFlash: false,
                         criticalHit: false,
-                        battleMessage: ""
+                        battleMessage: "",
+                        moveName: "",
+                        moveType: ""
                     }
                 };
             });
@@ -687,6 +712,27 @@
 
                 // バトルログ更新
                 addToBattleLog(`${attacker.name}の${move.name}！`);
+
+                // 技名を画面に大きく表示
+                setGameState(prev => ({
+                    ...prev,
+                    animationState: {
+                        ...prev.animationState,
+                        moveName: move.name,
+                        moveType: move.type
+                    }
+                }));
+
+                setTimeout(() => {
+                    setGameState(prev => ({
+                        ...prev,
+                        animationState: {
+                            ...prev.animationState,
+                            moveName: "",
+                            moveType: ""
+                        }
+                    }));
+                }, 1500);
 
                 if (result.message === "miss") {
                     addToBattleLog(`${attacker.name}の攻撃は外れた！`);
@@ -980,7 +1026,9 @@
                             squirtleFlash: false,
                             diglettFlash: false,
                             criticalHit: false,
-                            battleMessage: ""
+                            battleMessage: "",
+                            moveName: "",
+                            moveType: ""
                         }
                     };
                 });
@@ -1286,7 +1334,31 @@
                         gameState.animationState.battleMessage && React.createElement('div', {
                             key: 'miss-message',
                             className: `miss-animation fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 text-6xl font-bold text-red-500 drop-shadow-2xl bg-black/50 px-8 py-4 rounded-lg`
-                        }, gameState.animationState.battleMessage)
+                        }, gameState.animationState.battleMessage),
+                        // 技名表示
+                        gameState.animationState.moveName && React.createElement('div', {
+                            key: 'move-name-display',
+                            className: `move-name-display fixed top-1/3 left-1/2 z-50 px-12 py-8 rounded-2xl shadow-2xl border-4 text-center`,
+                            style: {
+                                background: 'linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,20,0.95) 100%)',
+                                borderColor: getMoveTypeColor(gameState.animationState.moveType).includes('yellow') ? '#FCD34D' :
+                                    getMoveTypeColor(gameState.animationState.moveType).includes('blue') ? '#60A5FA' :
+                                        getMoveTypeColor(gameState.animationState.moveType).includes('red') ? '#F87171' :
+                                            getMoveTypeColor(gameState.animationState.moveType).includes('green') ? '#4ADE80' :
+                                                getMoveTypeColor(gameState.animationState.moveType).includes('purple') ? '#C084FC' :
+                                                    getMoveTypeColor(gameState.animationState.moveType).includes('gray') ? '#9CA3AF' : '#FCD34D'
+                            }
+                        }, [
+                            React.createElement('div', {
+                                key: 'move-type-badge',
+                                className: `inline-block ${getMoveTypeColor(gameState.animationState.moveType)} px-4 py-2 rounded-full text-sm font-bold mb-3 text-center`
+                            }, gameState.animationState.moveType + 'タイプ'),
+                            React.createElement('div', {
+                                key: 'move-name-text',
+                                className: 'text-6xl font-black text-white drop-shadow-2xl text-center',
+                                style: { textShadow: '0 5px 15px rgba(0,0,0,0.8)' }
+                            }, gameState.animationState.moveName)
+                        ])
                     ]),
 
                     // 技選択ボタン
