@@ -472,9 +472,9 @@ const pokemonDatabase = {
     image: "ええ加減にしよし.png",
     moves: [
       { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
-      { name: "殴る", power: 70, type: "かくとう", accuracy: 100, pp: 25 },
-      { name: "四の字固め", power: 200, type: "かくとう", accuracy: 30, pp: 5 },
-      { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15 }
+      { name: "メガトンパンチ", power: 70, type: "かくとう", accuracy: 100, pp: 25 },
+      { name: "四の字固め", power: 300, type: "かくとう", accuracy: 30, pp: 5 },
+      { name: "パソコンで殴る", power: 115, type: "はがね", accuracy: 60, pp: 15 }
     ],
     stats: { attack: 140, defense: 70, speed: 80, special: 60 }
   }
