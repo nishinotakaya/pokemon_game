@@ -454,6 +454,21 @@ const pokemonDatabase = {
     name: "あさこし",
     maxHP: 170,
     type: "かくとう",
+    image: "あさこし.png",
+    moves: [
+      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 140, defense: 70, speed: 80, special: 60 }
+  },
+
+  // あさこし（怒り状態）
+  angrymasterenraged: {
+    name: "あさこし",
+    maxHP: 170,
+    type: "かくとう",
     image: "ええ加減にしよし.png",
     moves: [
       { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },

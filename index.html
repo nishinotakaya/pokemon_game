@@ -473,6 +473,7 @@
                     showPokemonSelector: false,
                     selectorMode: null, // "player" or "enemy"
                     showWinModal: false,
+                    showEnrageModal: false,
                     animationState: {
                         pikachuShake: false,
                         eeveeShake: false,
@@ -679,6 +680,106 @@
                         ...prev,
                         currentTurn: prev.currentTurn === "player" ? "enemy" : "player"
                     }));
+                    return;
+                }
+
+                // ブチギレる技の特別処理
+                if (move.name === "ブチギレる") {
+                    // バトルログ更新
+                    addToBattleLog(`${attacker.name}の${move.name}！`);
+
+                    // 技名を画面に大きく表示
+                    setGameState(prev => ({
+                        ...prev,
+                        animationState: {
+                            ...prev.animationState,
+                            moveName: move.name,
+                            moveType: move.type
+                        }
+                    }));
+
+                    setTimeout(() => {
+                        setGameState(prev => ({
+                            ...prev,
+                            animationState: {
+                                ...prev.animationState,
+                                moveName: "",
+                                moveType: ""
+                            }
+                        }));
+                    }, 1500);
+
+                    // PPを減らす
+                    setGameState(prev => {
+                        const attackerPokemonKey = prev[attackerKey];
+                        const attackerPokemon = prev[attackerPokemonKey];
+
+                        if (!attackerPokemon || !attackerPokemon.pp) {
+                            console.error(`Attacker pokemon not found: ${attackerPokemonKey}`);
+                            return prev;
+                        }
+
+                        return {
+                            ...prev,
+                            [attackerPokemonKey]: {
+                                ...attackerPokemon,
+                                pp: {
+                                    ...attackerPokemon.pp,
+                                    [moveIndex]: attackerPokemon.pp[moveIndex] - 1
+                                }
+                            }
+                        };
+                    });
+
+                    // モーダルを表示
+                    setTimeout(() => {
+                        setGameState(prev => ({ ...prev, showEnrageModal: true }));
+                    }, 300);
+
+                    // 1.5秒後にモーダルを閉じて変身
+                    setTimeout(() => {
+                        setGameState(prev => {
+                            const currentHP = attacker.currentHP || attacker.maxHP || 170;
+                            const enragedPokemon = pokemonDatabase['angrymasterenraged'];
+
+                            if (!enragedPokemon) {
+                                return { ...prev, showEnrageModal: false };
+                            }
+
+                            const newPokemonData = {
+                                ...enragedPokemon,
+                                currentHP: currentHP,
+                                status: null,
+                                pp: enragedPokemon.moves.reduce((acc, move, index) => {
+                                    acc[index] = move.pp;
+                                    return acc;
+                                }, {})
+                            };
+
+                            const newState = {
+                                ...prev,
+                                [attackerKey]: 'angrymasterenraged',
+                                showEnrageModal: false,
+                                battleLog: [
+                                    ...prev.battleLog.slice(-4),
+                                    `${attacker.name}がブチギレた！`,
+                                    `攻撃力が上昇した！`
+                                ]
+                            };
+
+                            newState['angrymasterenraged'] = newPokemonData;
+
+                            return newState;
+                        });
+                    }, 1800);
+
+                    // ターン終了
+                    setTimeout(() => {
+                        setGameState(prev => ({
+                            ...prev,
+                            currentTurn: prev.currentTurn === "player" ? "enemy" : "player"
+                        }));
+                    }, 1900);
                     return;
                 }
 
@@ -1016,6 +1117,7 @@
                         isGameOver: false,
                         winner: null,
                         showWinModal: false,
+                        showEnrageModal: false,
                         animationState: {
                             pikachuShake: false,
                             eeveeShake: false,
@@ -1433,7 +1535,7 @@
                     React.createElement('div', {
                         key: 'pokemon-grid',
                         className: 'grid grid-cols-2 md:grid-cols-4 gap-4'
-                    }, Object.entries(pokemonDatabase).map(([key, pokemon]) =>
+                    }, Object.entries(pokemonDatabase).filter(([key]) => key !== 'angrymasterenraged').map(([key, pokemon]) =>
                         React.createElement('div', {
                             key: `pokemon-${key}`,
                             onClick: () => selectPokemon(key),
@@ -1507,6 +1609,25 @@
                             className: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full text-xl transform hover:scale-105 transition-all duration-200 shadow-xl'
                         }, '閉じる')
                     ])
+                ])),
+
+                // ブチギレモーダル
+                gameState.showEnrageModal && React.createElement('div', {
+                    key: 'enrage-modal-overlay',
+                    className: 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50'
+                }, React.createElement('div', {
+                    key: 'enrage-modal-content',
+                    className: 'win-modal text-center'
+                }, [
+                    React.createElement('img', {
+                        key: 'enrage-image',
+                        src: 'ええ加減にしよし.png',
+                        alt: 'ブチギレた！',
+                        className: 'w-96 h-96 mx-auto drop-shadow-2xl',
+                        style: {
+                            filter: 'drop-shadow(0 0 30px rgba(255, 0, 0, 0.9))'
+                        }
+                    })
                 ]))
             ]);
         };
