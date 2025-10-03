@@ -414,9 +414,24 @@ const pokemonDatabase = {
       { name: "れいとうビーム", power: 90, type: "こおり", accuracy: 100, pp: 10 },
       { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
       { name: "あやしいひかり", power: 0, type: "ゴースト", accuracy: 100, pp: 10 },
-      { name: "ねむりごな", power: 0, type: "くさ", accuracy: 75, pp: 15 }
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
     ],
     stats: { attack: 50, defense: 35, speed: 95, special: 95 }
+  },
+
+  // 特別なポケモン - スペシャルファイター
+  specialfighter: {
+    name: "スペシャルファイター",
+    maxHP: 150,
+    type: "かくとう",
+    image: "image (1).png",
+    moves: [
+      { name: "4文字固め", power: 200, type: "かくとう", accuracy: 30, pp: 5 },
+      { name: "ヒップドロップ", power: 85, type: "かくとう", accuracy: 100, pp: 20 },
+      { name: "メガトンパンチ", power: 80, type: "かくとう", accuracy: 85, pp: 20 },
+      { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15 }
+    ],
+    stats: { attack: 120, defense: 80, speed: 85, special: 70 }
   }
 };
 
@@ -426,7 +441,8 @@ window.pokemonDatabase = pokemonDatabase;
 // 初期選択可能なポケモン（バトル開始時）
 const starterPokemon = [
   'pikachu', 'eevee', 'charmander', 'squirtle', 'bulbasaur',
-  'mewtwo', 'mew', 'dragonite', 'snorlax', 'gyarados'
+  'mewtwo', 'mew', 'dragonite', 'snorlax', 'gyarados',
+  'specialfighter', 'machamp', 'jynx'
 ];
 
 window.starterPokemon = starterPokemon;
