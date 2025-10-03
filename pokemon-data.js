@@ -449,9 +449,9 @@ const pokemonDatabase = {
     stats: { attack: 90, defense: 70, speed: 95, special: 85 }
   },
 
-  // あさこし
+  // あ0こし
   angrymaster: {
-    name: "あさこし",
+    name: "あ０こし",
     maxHP: 170,
     type: "かくとう",
     image: "あさこし.png",
@@ -464,9 +464,9 @@ const pokemonDatabase = {
     stats: { attack: 140, defense: 70, speed: 80, special: 60 }
   },
 
-  // あさこし（怒り状態）
+  // あ0こし（怒り状態）
   angrymasterenraged: {
-    name: "あさこし",
+    name: "あ0こし",
     maxHP: 170,
     type: "かくとう",
     image: "ええ加減にしよし.png",
