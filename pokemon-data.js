@@ -426,7 +426,7 @@ const pokemonDatabase = {
     type: "かくとう",
     image: "image (1).png",
     moves: [
-      { name: "4文字固め", power: 200, type: "かくとう", accuracy: 30, pp: 5 },
+      { name: "四の字固め", power: 200, type: "かくとう", accuracy: 30, pp: 5 },
       { name: "ヒップドロップ", power: 85, type: "かくとう", accuracy: 100, pp: 20 },
       { name: "メガトンパンチ", power: 80, type: "かくとう", accuracy: 85, pp: 20 },
       { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15 }
@@ -473,7 +473,7 @@ const pokemonDatabase = {
     moves: [
       { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
       { name: "殴る", power: 70, type: "かくとう", accuracy: 100, pp: 25 },
-      { name: "4文字固め", power: 200, type: "かくとう", accuracy: 30, pp: 5 },
+      { name: "四の字固め", power: 200, type: "かくとう", accuracy: 30, pp: 5 },
       { name: "パソコンで殴る", power: 95, type: "はがね", accuracy: 90, pp: 15 }
     ],
     stats: { attack: 140, defense: 70, speed: 80, special: 60 }
