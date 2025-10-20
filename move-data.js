@@ -1,5 +1,5 @@
 // 技データベース
-export const moveDatabase = {
+const moveDatabase = {
   // ノーマルタイプ
   tackle: { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35, description: "相手に体当たりして攻撃する" },
   scratch: { name: "ひっかく", power: 40, type: "ノーマル", accuracy: 100, pp: 35, description: "鋭い爪で相手をひっかく" },
@@ -147,7 +147,7 @@ export const moveDatabase = {
 };
 
 // 技の効果（状態変化など）
-export const moveEffects = {
+const moveEffects = {
   // 状態変化技
   sleep: { name: "ねむり", duration: "1-3ターン", effect: "行動できない" },
   paralysis: { name: "マヒ", duration: "永続", effect: "25%の確率で行動できない" },
@@ -166,3 +166,7 @@ export const moveEffects = {
   recover: { name: "HP回復", amount: "最大HPの50%", effect: "HPを回復する" },
   rest: { name: "ねむる", amount: "最大HPの100%", effect: "HPを全回復するが2ターン眠る" }
 };
+
+// グローバル変数として設定
+window.moveDatabase = moveDatabase;
+window.moveEffects = moveEffects;

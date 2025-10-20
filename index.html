@@ -441,21 +441,39 @@
                 }
             };
 
-            // 初期ポケモンデータの準備
+            // ポケモンのインスタンス管理（同じポケモンでも別々のインスタンスを作成）
+            const createPokemonInstance = (pokemonKey, instanceId) => {
+                const pokemon = pokemonDatabase[pokemonKey];
+                if (!pokemon) return null;
+
+                return {
+                    ...pokemon,
+                    instanceId: instanceId, // インスタンスIDを追加
+                    currentHP: pokemon.maxHP,
+                    status: null,
+                    pp: pokemon.moves.reduce((acc, move, index) => {
+                        acc[index] = move.pp;
+                        return acc;
+                    }, {})
+                };
+            };
+
+            // 初期ポケモンデータの準備（インスタンス管理対応）
             const initializePokemonData = () => {
                 const initialData = {};
-                Object.keys(pokemonDatabase).forEach(key => {
-                    const pokemon = pokemonDatabase[key];
-                    initialData[key] = {
-                        ...pokemon,
-                        currentHP: pokemon.maxHP,
-                        status: null,
-                        pp: pokemon.moves.reduce((acc, move, index) => {
-                            acc[index] = move.pp;
-                            return acc;
-                        }, {})
-                    };
-                });
+
+                // プレイヤー用インスタンス
+                const playerPokemon = createPokemonInstance('pikachu', 'player');
+                if (playerPokemon) {
+                    initialData.playerInstance = playerPokemon;
+                }
+
+                // 敵用インスタンス
+                const enemyPokemon = createPokemonInstance('eevee', 'enemy');
+                if (enemyPokemon) {
+                    initialData.enemyInstance = enemyPokemon;
+                }
+
                 return initialData;
             };
 
@@ -789,26 +807,42 @@
                 const attackerAnimationTarget = `${attackerKey}Flash`;
                 triggerAnimation("flash", attackerAnimationTarget, 300);
 
-                // PP消費
+                // PP消費（インスタンス管理対応）
                 setGameState(prev => {
-                    const attackerPokemonKey = prev[attackerKey];
-                    const attackerPokemon = prev[attackerPokemonKey];
-
-                    if (!attackerPokemon || !attackerPokemon.pp) {
-                        console.error(`Attacker pokemon not found: ${attackerPokemonKey}`);
-                        return prev;
-                    }
-
-                    return {
-                        ...prev,
-                        [attackerPokemonKey]: {
-                            ...attackerPokemon,
-                            pp: {
-                                ...attackerPokemon.pp,
-                                [moveIndex]: attackerPokemon.pp[moveIndex] - 1
-                            }
+                    if (attackerKey === "playerPokemon") {
+                        const attackerPokemon = prev.playerInstance;
+                        if (!attackerPokemon || !attackerPokemon.pp) {
+                            console.error(`Player pokemon not found`);
+                            return prev;
                         }
-                    };
+                        return {
+                            ...prev,
+                            playerInstance: {
+                                ...attackerPokemon,
+                                pp: {
+                                    ...attackerPokemon.pp,
+                                    [moveIndex]: attackerPokemon.pp[moveIndex] - 1
+                                }
+                            }
+                        };
+                    } else if (attackerKey === "enemyPokemon") {
+                        const attackerPokemon = prev.enemyInstance;
+                        if (!attackerPokemon || !attackerPokemon.pp) {
+                            console.error(`Enemy pokemon not found`);
+                            return prev;
+                        }
+                        return {
+                            ...prev,
+                            enemyInstance: {
+                                ...attackerPokemon,
+                                pp: {
+                                    ...attackerPokemon.pp,
+                                    [moveIndex]: attackerPokemon.pp[moveIndex] - 1
+                                }
+                            }
+                        };
+                    }
+                    return prev;
                 });
 
                 // バトルログ更新
@@ -943,28 +977,36 @@
 
                 addToBattleLog(`${defender.name}に${result.damage}ダメージ！`);
 
-                // HP更新とゲーム状態更新
+                // HP更新とゲーム状態更新（インスタンス管理対応）
                 setGameState(prev => {
-                    const defenderPokemonKey = prev[defenderKey];
-                    const defenderPokemon = prev[defenderPokemonKey];
+                    let newState = { ...prev };
 
-                    if (!defenderPokemon) {
-                        console.error(`Defender pokemon not found: ${defenderPokemonKey}`);
-                        return prev;
-                    }
-
-                    const newState = {
-                        ...prev,
-                        [defenderPokemonKey]: {
+                    if (defenderKey === "playerPokemon") {
+                        const defenderPokemon = prev.playerInstance;
+                        if (!defenderPokemon) {
+                            console.error(`Player pokemon not found`);
+                            return prev;
+                        }
+                        newState.playerInstance = {
                             ...defenderPokemon,
                             currentHP: newDefenderHP
+                        };
+                    } else if (defenderKey === "enemyPokemon") {
+                        const defenderPokemon = prev.enemyInstance;
+                        if (!defenderPokemon) {
+                            console.error(`Enemy pokemon not found`);
+                            return prev;
                         }
-                    };
+                        newState.enemyInstance = {
+                            ...defenderPokemon,
+                            currentHP: newDefenderHP
+                        };
+                    }
 
                     if (newDefenderHP <= 0) {
                         newState.isGameOver = true;
-                        // 勝者を正しく設定（attackerKeyではなく、実際のポケモンキー）
-                        newState.winner = prev[attackerKey];
+                        // 勝者を正しく設定
+                        newState.winner = attackerKey === "playerPokemon" ? "player" : "enemy";
                         // 勝利効果音
                         try {
                             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1064,39 +1106,17 @@
                 }
             }, [gameState.currentTurn]);
 
-            // ポケモン選択関数
+            // ポケモン選択関数（インスタンス管理対応）
             const selectPokemon = (pokemonKey) => {
                 setGameState(prev => {
                     const newState = { ...prev };
-                    const pokemonData = pokemonDatabase[pokemonKey];
-
-                    if (!pokemonData) {
-                        console.error(`Pokemon data not found: ${pokemonKey}`);
-                        return prev;
-                    }
 
                     if (prev.selectorMode === "player") {
                         newState.playerPokemon = pokemonKey;
-                        newState[pokemonKey] = {
-                            ...pokemonData,
-                            currentHP: pokemonData.maxHP,
-                            status: null,
-                            pp: pokemonData.moves.reduce((acc, move, index) => {
-                                acc[index] = move.pp;
-                                return acc;
-                            }, {})
-                        };
+                        newState.playerInstance = createPokemonInstance(pokemonKey, 'player');
                     } else if (prev.selectorMode === "enemy") {
                         newState.enemyPokemon = pokemonKey;
-                        newState[pokemonKey] = {
-                            ...pokemonData,
-                            currentHP: pokemonData.maxHP,
-                            status: null,
-                            pp: pokemonData.moves.reduce((acc, move, index) => {
-                                acc[index] = move.pp;
-                                return acc;
-                            }, {})
-                        };
+                        newState.enemyInstance = createPokemonInstance(pokemonKey, 'enemy');
                     }
 
                     newState.showPokemonSelector = false;
@@ -1185,12 +1205,10 @@
                 return colors[type] || 'bg-blue-500 hover:bg-blue-600';
             };
 
-            // 現在のポケモンを取得（安全な取得）
+            // 現在のポケモンを取得（インスタンス管理対応）
             const getCurrentPokemon = (key) => {
-                const pokemonKey = gameState[key];
-                if (!pokemonKey) {
-                    console.error(`Pokemon key not found: ${key}`);
-                    return {
+                if (key === "playerPokemon") {
+                    return gameState.playerInstance || {
                         name: "ピカチュウ",
                         maxHP: 100,
                         currentHP: 100,
@@ -1205,31 +1223,27 @@
                         stats: { attack: 55, defense: 40, speed: 90, special: 50 },
                         pp: { 0: 30, 1: 30, 2: 15, 3: 10 }
                     };
-                }
-
-                const pokemon = gameState[pokemonKey];
-                if (!pokemon) {
-                    console.error(`Pokemon not found: ${pokemonKey}`);
-                    // フォールバック用のデフォルトポケモンを返す
-                    return {
-                        name: "ピカチュウ",
+                } else if (key === "enemyPokemon") {
+                    return gameState.enemyInstance || {
+                        name: "イーブイ",
                         maxHP: 100,
                         currentHP: 100,
-                        type: "でんき",
-                        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
+                        type: "ノーマル",
+                        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png",
                         moves: [
-                            { name: "でんきショック", power: 40, type: "でんき", accuracy: 100, pp: 30 },
                             { name: "でんこうせっか", power: 40, type: "ノーマル", accuracy: 100, pp: 30 },
-                            { name: "10まんボルト", power: 90, type: "でんき", accuracy: 100, pp: 15 },
-                            { name: "かみなり", power: 110, type: "でんき", accuracy: 70, pp: 10 }
+                            { name: "しっぽをふる", power: 0, type: "ノーマル", accuracy: 100, pp: 30 },
+                            { name: "とっしん", power: 90, type: "ノーマル", accuracy: 85, pp: 20 },
+                            { name: "はねる", power: 0, type: "ノーマル", accuracy: 100, pp: 40 }
                         ],
-                        stats: { attack: 55, defense: 40, speed: 90, special: 50 },
-                        pp: { 0: 30, 1: 30, 2: 15, 3: 10 }
+                        stats: { attack: 55, defense: 50, speed: 55, special: 45 },
+                        pp: { 0: 30, 1: 30, 2: 20, 3: 40 }
                     };
                 }
 
                 // HPの整合性をチェック
-                if (pokemon.currentHP === undefined || pokemon.currentHP < 0) {
+                const pokemon = gameState[key];
+                if (pokemon && (pokemon.currentHP === undefined || pokemon.currentHP < 0)) {
                     pokemon.currentHP = pokemon.maxHP || 100;
                 }
 
@@ -1428,7 +1442,7 @@
                                     : 'bg-red-600 text-white'
                                 }`
                         }, gameState.isGameOver
-                            ? `ゲーム終了！${gameState.winner === gameState.playerPokemon ? getCurrentPokemon('playerPokemon').name : getCurrentPokemon('enemyPokemon').name}の勝利！`
+                            ? `ゲーム終了！${gameState.winner === 'player' ? getCurrentPokemon('playerPokemon').name : getCurrentPokemon('enemyPokemon').name}の勝利！`
                             : gameState.currentTurn === 'player'
                                 ? 'あなたのターン'
                                 : 'CPUのターン'),
@@ -1588,11 +1602,11 @@
                                 WebkitTextStroke: '3px #B45309',
                                 textShadow: '0 10px 30px rgba(0,0,0,0.5)'
                             }
-                        }, 'WIN!'),
+                        }, gameState.winner === 'player' ? 'WIN!' : 'LOSE!'),
                         React.createElement('img', {
                             key: 'winner-image',
-                            src: gameState.winner === gameState.playerPokemon ? getCurrentPokemon('playerPokemon').image : getCurrentPokemon('enemyPokemon').image,
-                            alt: gameState.winner === gameState.playerPokemon ? getCurrentPokemon('playerPokemon').name : getCurrentPokemon('enemyPokemon').name,
+                            src: gameState.winner === 'player' ? getCurrentPokemon('playerPokemon').image : getCurrentPokemon('enemyPokemon').image,
+                            alt: gameState.winner === 'player' ? getCurrentPokemon('playerPokemon').name : getCurrentPokemon('enemyPokemon').name,
                             className: 'w-48 h-48 mx-auto mb-6 drop-shadow-2xl bounce',
                             style: {
                                 imageRendering: 'pixelated',
@@ -1602,7 +1616,9 @@
                         React.createElement('div', {
                             key: 'winner-name',
                             className: 'text-4xl font-bold text-gray-800 mb-8 drop-shadow-lg'
-                        }, `${gameState.winner === gameState.playerPokemon ? getCurrentPokemon('playerPokemon').name : getCurrentPokemon('enemyPokemon').name}の勝利！`),
+                        }, gameState.winner === 'player'
+                            ? `${getCurrentPokemon('playerPokemon').name}の勝利！`
+                            : `${getCurrentPokemon('enemyPokemon').name}の勝利！`),
                         React.createElement('button', {
                             key: 'close-win-modal',
                             onClick: () => setGameState(prev => ({ ...prev, showWinModal: false })),

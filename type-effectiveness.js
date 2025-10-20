@@ -1,5 +1,5 @@
 // 全タイプ相性チャート（初代151匹対応）
-export const typeEffectiveness = {
+const typeEffectiveness = {
   // ノーマルタイプ
   'ノーマル': {
     'ノーマル': 1.0, 'ほのお': 1.0, 'みず': 1.0, 'でんき': 1.0, 'くさ': 1.0,
@@ -146,7 +146,7 @@ export const typeEffectiveness = {
 };
 
 // タイプ別の色設定
-export const typeColors = {
+const typeColors = {
   'ノーマル': 'bg-gray-300 hover:bg-gray-400 text-gray-800',
   'ほのお': 'bg-red-500 hover:bg-red-600 text-white',
   'みず': 'bg-blue-500 hover:bg-blue-600 text-white',
@@ -166,3 +166,7 @@ export const typeColors = {
   'はがね': 'bg-gray-400 hover:bg-gray-500 text-black',
   'フェアリー': 'bg-pink-300 hover:bg-pink-400 text-black'
 };
+
+// グローバル変数として設定
+window.typeEffectiveness = typeEffectiveness;
+window.typeColors = typeColors;

@@ -365,6 +365,127 @@ const pokemonDatabase = {
     stats: { attack: 90, defense: 80, speed: 110, special: 110 }
   },
 
+  // 可愛い系ポケモン
+  jigglypuff: {
+    name: "プリン",
+    maxHP: 140,
+    type: "ノーマル",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/39.png",
+    moves: [
+      { name: "うたう", power: 0, type: "ノーマル", accuracy: 55, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35 },
+      { name: "すてみタックル", power: 120, type: "ノーマル", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 45, defense: 20, speed: 20, special: 25 }
+  },
+  clefairy: {
+    name: "ピッピ",
+    maxHP: 120,
+    type: "ノーマル",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/35.png",
+    moves: [
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "メテオ", power: 100, type: "いわ", accuracy: 100, pp: 5 },
+      { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 45, defense: 48, speed: 35, special: 60 }
+  },
+  togepi: {
+    name: "トゲピー",
+    maxHP: 100,
+    type: "ノーマル",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/175.png",
+    moves: [
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "あくび", power: 0, type: "ノーマル", accuracy: 100, pp: 10 }
+    ],
+    stats: { attack: 20, defense: 65, speed: 20, special: 40 }
+  },
+  magikarp: {
+    name: "コイキング",
+    maxHP: 40,
+    type: "みず",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png",
+    moves: [
+      { name: "はねる", power: 0, type: "ノーマル", accuracy: 100, pp: 40 },
+      { name: "はねる", power: 0, type: "ノーマル", accuracy: 100, pp: 40 },
+      { name: "はねる", power: 0, type: "ノーマル", accuracy: 100, pp: 40 },
+      { name: "はねる", power: 0, type: "ノーマル", accuracy: 100, pp: 40 }
+    ],
+    stats: { attack: 10, defense: 55, speed: 80, special: 20 }
+  },
+  psyduck: {
+    name: "コダック",
+    maxHP: 100,
+    type: "みず",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/54.png",
+    moves: [
+      { name: "みずでっぽう", power: 40, type: "みず", accuracy: 100, pp: 25 },
+      { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35 },
+      { name: "あくび", power: 0, type: "ノーマル", accuracy: 100, pp: 10 }
+    ],
+    stats: { attack: 52, defense: 48, speed: 55, special: 65 }
+  },
+  slowpoke: {
+    name: "ヤドン",
+    maxHP: 120,
+    type: "みず",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/79.png",
+    moves: [
+      { name: "みずでっぽう", power: 40, type: "みず", accuracy: 100, pp: 25 },
+      { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "あくび", power: 0, type: "ノーマル", accuracy: 100, pp: 10 },
+      { name: "ねむる", power: 0, type: "ノーマル", accuracy: 100, pp: 10 }
+    ],
+    stats: { attack: 65, defense: 65, speed: 15, special: 40 }
+  },
+  vulpix: {
+    name: "ロコン",
+    maxHP: 100,
+    type: "ほのお",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/37.png",
+    moves: [
+      { name: "ひのこ", power: 40, type: "ほのお", accuracy: 100, pp: 25 },
+      { name: "あやしいひかり", power: 0, type: "ゴースト", accuracy: 100, pp: 10 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "かえんほうしゃ", power: 95, type: "ほのお", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 41, defense: 40, speed: 65, special: 65 }
+  },
+  growlithe: {
+    name: "ガーディ",
+    maxHP: 120,
+    type: "ほのお",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/58.png",
+    moves: [
+      { name: "ひのこ", power: 40, type: "ほのお", accuracy: 100, pp: 25 },
+      { name: "かみつく", power: 60, type: "あく", accuracy: 100, pp: 25 },
+      { name: "かえんほうしゃ", power: 95, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "フレアドライブ", power: 120, type: "ほのお", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 70, defense: 45, speed: 60, special: 70 }
+  },
+
+  // メガニューム
+  mega_charizard_x: {
+    name: "メガリザードンX",
+    maxHP: 180,
+    type: "ほのお・ドラゴン",
+    image: "https://zukan.pokemon.co.jp/zukan-api/up/images/index/3d12b5be5422a9198988501b8699cf1d.png",
+    moves: [
+      { name: "かえんほうしゃ", power: 115, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "ドラゴンクロー", power: 100, type: "ドラゴン", accuracy: 100, pp: 15 },
+      { name: "フレアドライブ", power: 140, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "そらをとぶ", power: 110, type: "ひこう", accuracy: 95, pp: 15 }
+    ],
+    stats: { attack: 130, defense: 111, speed: 100, special: 109 }
+  },
+
   // その他
   diglett: {
     name: "ディグダ",
@@ -477,6 +598,125 @@ const pokemonDatabase = {
       { name: "パソコンで殴る", power: 115, type: "はがね", accuracy: 60, pp: 15 }
     ],
     stats: { attack: 140, defense: 70, speed: 80, special: 60 }
+  },
+
+  // 人気ポケモン追加
+  lucario: {
+    name: "ルカリオ",
+    maxHP: 160,
+    type: "かくとう・エスパー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/448.png",
+    moves: [
+      { name: "はどうだん", power: 80, type: "かくとう", accuracy: 100, pp: 20 },
+      { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "メタルクロー", power: 50, type: "はがね", accuracy: 95, pp: 35 },
+      { name: "りゅうのはどう", power: 85, type: "ドラゴン", accuracy: 100, pp: 10 }
+    ],
+    stats: { attack: 110, defense: 70, speed: 90, special: 115 }
+  },
+  gardevoir: {
+    name: "サーナイト",
+    maxHP: 150,
+    type: "エスパー・フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/282.png",
+    moves: [
+      { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "マジカルシャイン", power: 80, type: "フェアリー", accuracy: 100, pp: 10 },
+      { name: "さいみんじゅつ", power: 0, type: "エスパー", accuracy: 60, pp: 20 }
+    ],
+    stats: { attack: 65, defense: 65, speed: 80, special: 125 }
+  },
+  greninja: {
+    name: "ゲッコウガ",
+    maxHP: 160,
+    type: "みず・あく",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/658.png",
+    moves: [
+      { name: "みずのはどう", power: 60, type: "みず", accuracy: 100, pp: 20 },
+      { name: "あくのはどう", power: 80, type: "あく", accuracy: 100, pp: 15 },
+      { name: "つじぎり", power: 70, type: "あく", accuracy: 100, pp: 15 },
+      { name: "だいもんじ", power: 110, type: "ほのお", accuracy: 85, pp: 5 }
+    ],
+    stats: { attack: 95, defense: 67, speed: 122, special: 103 }
+  },
+  charizard: {
+    name: "リザードン",
+    maxHP: 160,
+    type: "ほのお・ひこう",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
+    moves: [
+      { name: "かえんほうしゃ", power: 95, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "ドラゴンクロー", power: 80, type: "ドラゴン", accuracy: 100, pp: 15 },
+      { name: "フレアドライブ", power: 120, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "そらをとぶ", power: 90, type: "ひこう", accuracy: 95, pp: 15 }
+    ],
+    stats: { attack: 84, defense: 78, speed: 100, special: 109 }
+  },
+  venusaur: {
+    name: "フシギバナ",
+    maxHP: 160,
+    type: "くさ・どく",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png",
+    moves: [
+      { name: "はなふぶき", power: 90, type: "くさ", accuracy: 100, pp: 15 },
+      { name: "どくのこな", power: 0, type: "どく", accuracy: 75, pp: 35 },
+      { name: "ソーラービーム", power: 120, type: "くさ", accuracy: 100, pp: 10 },
+      { name: "あなほり", power: 80, type: "じめん", accuracy: 100, pp: 10 }
+    ],
+    stats: { attack: 82, defense: 83, speed: 80, special: 100 }
+  },
+  blastoise: {
+    name: "カメックス",
+    maxHP: 160,
+    type: "みず",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png",
+    moves: [
+      { name: "なみのり", power: 90, type: "みず", accuracy: 100, pp: 15 },
+      { name: "ハイドロポンプ", power: 110, type: "みず", accuracy: 80, pp: 5 },
+      { name: "からにこもる", power: 0, type: "みず", accuracy: 100, pp: 40 },
+      { name: "ハイドロカノン", power: 150, type: "みず", accuracy: 90, pp: 5 }
+    ],
+    stats: { attack: 83, defense: 100, speed: 78, special: 85 }
+  },
+  umbreon: {
+    name: "ブラッキー",
+    maxHP: 160,
+    type: "あく",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/197.png",
+    moves: [
+      { name: "あくのはどう", power: 80, type: "あく", accuracy: 100, pp: 15 },
+      { name: "つじぎり", power: 70, type: "あく", accuracy: 100, pp: 15 },
+      { name: "かみつく", power: 60, type: "あく", accuracy: 100, pp: 25 },
+      { name: "あくび", power: 0, type: "ノーマル", accuracy: 100, pp: 10 }
+    ],
+    stats: { attack: 65, defense: 110, speed: 65, special: 60 }
+  },
+  espeon: {
+    name: "エーフィ",
+    maxHP: 160,
+    type: "エスパー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png",
+    moves: [
+      { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "サイコビーム", power: 65, type: "エスパー", accuracy: 100, pp: 20 },
+      { name: "ねんりき", power: 50, type: "エスパー", accuracy: 100, pp: 25 },
+      { name: "さいみんじゅつ", power: 0, type: "エスパー", accuracy: 60, pp: 20 }
+    ],
+    stats: { attack: 65, defense: 60, speed: 110, special: 130 }
+  },
+  sylveon: {
+    name: "ニンフィア",
+    maxHP: 160,
+    type: "フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/700.png",
+    moves: [
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "マジカルシャイン", power: 80, type: "フェアリー", accuracy: 100, pp: 10 },
+      { name: "じゃれつく", power: 90, type: "フェアリー", accuracy: 90, pp: 10 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
+    ],
+    stats: { attack: 65, defense: 65, speed: 60, special: 110 }
   }
 };
 
@@ -487,7 +727,15 @@ window.pokemonDatabase = pokemonDatabase;
 const starterPokemon = [
   'pikachu', 'eevee', 'charmander', 'squirtle', 'bulbasaur',
   'mewtwo', 'mew', 'dragonite', 'snorlax', 'gyarados',
-  'specialfighter', 'machamp', 'jynx', 'pokemontrainer', 'angrymaster'
+  'specialfighter', 'machamp', 'jynx', 'pokemontrainer', 'angrymaster',
+  // 可愛い系ポケモン
+  'jigglypuff', 'clefairy', 'togepi', 'magikarp', 'psyduck', 'slowpoke', 'vulpix', 'growlithe',
+  // メガニューム
+  'mega_charizard_x',
+  // その他人気ポケモン
+  'lapras', 'aerodactyl', 'articuno', 'zapdos', 'moltres', 'alakazam', 'gengar',
+  // 新しく追加した人気ポケモン
+  'lucario', 'gardevoir', 'greninja', 'charizard', 'venusaur', 'blastoise', 'umbreon', 'espeon', 'sylveon'
 ];
 
 window.starterPokemon = starterPokemon;
