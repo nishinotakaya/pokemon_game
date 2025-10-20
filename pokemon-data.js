@@ -717,6 +717,229 @@ const pokemonDatabase = {
       { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
     ],
     stats: { attack: 65, defense: 65, speed: 60, special: 110 }
+  },
+
+  // 女の子に人気のポケモン追加
+  miltank: {
+    name: "ミルタンク",
+    maxHP: 160,
+    type: "ノーマル",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/241.png",
+    moves: [
+      { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35 },
+      { name: "ミルクのみ", power: 0, type: "ノーマル", accuracy: 100, pp: 10 },
+      { name: "すてみタックル", power: 120, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
+    ],
+    stats: { attack: 80, defense: 105, speed: 100, special: 40 }
+  },
+  chansey: {
+    name: "ラッキー",
+    maxHP: 200,
+    type: "ノーマル",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/113.png",
+    moves: [
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "いやしのすず", power: 0, type: "ノーマル", accuracy: 100, pp: 10 },
+      { name: "たまなげ", power: 50, type: "ノーマル", accuracy: 90, pp: 20 },
+      { name: "すてみタックル", power: 120, type: "ノーマル", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 5, defense: 5, speed: 50, special: 35 }
+  },
+  clefable: {
+    name: "ピクシー",
+    maxHP: 140,
+    type: "フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/36.png",
+    moves: [
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "メテオ", power: 100, type: "いわ", accuracy: 100, pp: 5 },
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 70, defense: 73, speed: 60, special: 85 }
+  },
+  wigglytuff: {
+    name: "プクリン",
+    maxHP: 160,
+    type: "ノーマル・フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/40.png",
+    moves: [
+      { name: "うたう", power: 0, type: "ノーマル", accuracy: 55, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "すてみタックル", power: 120, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 70, defense: 45, speed: 45, special: 75 }
+  },
+  togetic: {
+    name: "トゲチック",
+    maxHP: 120,
+    type: "ノーマル・ひこう",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/176.png",
+    moves: [
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "そらをとぶ", power: 90, type: "ひこう", accuracy: 95, pp: 15 },
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 40, defense: 85, speed: 40, special: 80 }
+  },
+  togekiss: {
+    name: "トゲキッス",
+    maxHP: 160,
+    type: "フェアリー・ひこう",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/468.png",
+    moves: [
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "そらをとぶ", power: 90, type: "ひこう", accuracy: 95, pp: 15 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
+    ],
+    stats: { attack: 50, defense: 95, speed: 80, special: 120 }
+  },
+  shaymin: {
+    name: "シェイミ",
+    maxHP: 160,
+    type: "くさ",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/492.png",
+    moves: [
+      { name: "はなふぶき", power: 90, type: "くさ", accuracy: 100, pp: 15 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "ソーラービーム", power: 120, type: "くさ", accuracy: 100, pp: 10 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 }
+    ],
+    stats: { attack: 100, defense: 100, speed: 100, special: 100 }
+  },
+  minccino: {
+    name: "チラーミィ",
+    maxHP: 100,
+    type: "ノーマル",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/572.png",
+    moves: [
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35 },
+      { name: "すてみタックル", power: 120, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 50, defense: 40, speed: 75, special: 40 }
+  },
+  cinccino: {
+    name: "チラチーノ",
+    maxHP: 140,
+    type: "ノーマル",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/573.png",
+    moves: [
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "すてみタックル", power: 120, type: "ノーマル", accuracy: 100, pp: 15 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "たいあたり", power: 40, type: "ノーマル", accuracy: 100, pp: 35 }
+    ],
+    stats: { attack: 95, defense: 60, speed: 115, special: 60 }
+  },
+  fennekin: {
+    name: "フォッコ",
+    maxHP: 100,
+    type: "ほのお",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/653.png",
+    moves: [
+      { name: "ひのこ", power: 40, type: "ほのお", accuracy: 100, pp: 25 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "かえんほうしゃ", power: 95, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 45, defense: 40, speed: 60, special: 62 }
+  },
+  braixen: {
+    name: "テールナー",
+    maxHP: 120,
+    type: "ほのお",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/654.png",
+    moves: [
+      { name: "かえんほうしゃ", power: 95, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 59, defense: 58, speed: 73, special: 90 }
+  },
+  delphox: {
+    name: "マフォクシー",
+    maxHP: 160,
+    type: "ほのお・エスパー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/655.png",
+    moves: [
+      { name: "かえんほうしゃ", power: 95, type: "ほのお", accuracy: 100, pp: 15 },
+      { name: "サイコキネシス", power: 90, type: "エスパー", accuracy: 100, pp: 10 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 69, defense: 72, speed: 104, special: 114 }
+  },
+  floette: {
+    name: "フラエッテ",
+    maxHP: 120,
+    type: "フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/670.png",
+    moves: [
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "はなふぶき", power: 90, type: "くさ", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 45, defense: 47, speed: 52, special: 75 }
+  },
+  florges: {
+    name: "フラージェス",
+    maxHP: 160,
+    type: "フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/671.png",
+    moves: [
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "はなふぶき", power: 90, type: "くさ", accuracy: 100, pp: 15 }
+    ],
+    stats: { attack: 65, defense: 68, speed: 75, special: 112 }
+  },
+  primarina: {
+    name: "アシレーヌ",
+    maxHP: 160,
+    type: "みず・フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/730.png",
+    moves: [
+      { name: "ハイドロポンプ", power: 110, type: "みず", accuracy: 80, pp: 5 },
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 74, defense: 74, speed: 60, special: 126 }
+  },
+  mimikyu: {
+    name: "ミミッキュ",
+    maxHP: 160,
+    type: "ゴースト・フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/778.png",
+    moves: [
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "シャドーボール", power: 80, type: "ゴースト", accuracy: 100, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 }
+    ],
+    stats: { attack: 90, defense: 80, speed: 96, special: 105 }
+  },
+  alcremie: {
+    name: "マホイップ",
+    maxHP: 160,
+    type: "フェアリー",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/869.png",
+    moves: [
+      { name: "ムーンフォース", power: 95, type: "フェアリー", accuracy: 100, pp: 15 },
+      { name: "ウィンク", power: 0, type: "ノーマル", accuracy: 100, pp: 20 },
+      { name: "つきのひかり", power: 0, type: "ノーマル", accuracy: 100, pp: 5 },
+      { name: "マジカルシャイン", power: 80, type: "フェアリー", accuracy: 100, pp: 10 }
+    ],
+    stats: { attack: 60, defense: 75, speed: 64, special: 110 }
   }
 };
 
@@ -735,7 +958,11 @@ const starterPokemon = [
   // その他人気ポケモン
   'lapras', 'aerodactyl', 'articuno', 'zapdos', 'moltres', 'alakazam', 'gengar',
   // 新しく追加した人気ポケモン
-  'lucario', 'gardevoir', 'greninja', 'charizard', 'venusaur', 'blastoise', 'umbreon', 'espeon', 'sylveon'
+  'lucario', 'gardevoir', 'greninja', 'charizard', 'venusaur', 'blastoise', 'umbreon', 'espeon', 'sylveon',
+  // 女の子に人気のポケモン
+  'miltank', 'chansey', 'clefable', 'wigglytuff', 'togetic', 'togekiss', 'shaymin',
+  'minccino', 'cinccino', 'fennekin', 'braixen', 'delphox', 'floette', 'florges',
+  'primarina', 'mimikyu', 'alcremie'
 ];
 
 window.starterPokemon = starterPokemon;
