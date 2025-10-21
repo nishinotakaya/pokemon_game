@@ -727,26 +727,42 @@
                         }));
                     }, 1500);
 
-                    // PPを減らす
+                    // PPを減らす（インスタンス管理対応）
                     setGameState(prev => {
-                        const attackerPokemonKey = prev[attackerKey];
-                        const attackerPokemon = prev[attackerPokemonKey];
-
-                        if (!attackerPokemon || !attackerPokemon.pp) {
-                            console.error(`Attacker pokemon not found: ${attackerPokemonKey}`);
-                            return prev;
-                        }
-
-                        return {
-                            ...prev,
-                            [attackerPokemonKey]: {
-                                ...attackerPokemon,
-                                pp: {
-                                    ...attackerPokemon.pp,
-                                    [moveIndex]: attackerPokemon.pp[moveIndex] - 1
-                                }
+                        if (attackerKey === "playerPokemon") {
+                            const attackerPokemon = prev.playerInstance;
+                            if (!attackerPokemon || !attackerPokemon.pp) {
+                                console.error(`Player pokemon not found`);
+                                return prev;
                             }
-                        };
+                            return {
+                                ...prev,
+                                playerInstance: {
+                                    ...attackerPokemon,
+                                    pp: {
+                                        ...attackerPokemon.pp,
+                                        [moveIndex]: attackerPokemon.pp[moveIndex] - 1
+                                    }
+                                }
+                            };
+                        } else if (attackerKey === "enemyPokemon") {
+                            const attackerPokemon = prev.enemyInstance;
+                            if (!attackerPokemon || !attackerPokemon.pp) {
+                                console.error(`Enemy pokemon not found`);
+                                return prev;
+                            }
+                            return {
+                                ...prev,
+                                enemyInstance: {
+                                    ...attackerPokemon,
+                                    pp: {
+                                        ...attackerPokemon.pp,
+                                        [moveIndex]: attackerPokemon.pp[moveIndex] - 1
+                                    }
+                                }
+                            };
+                        }
+                        return prev;
                     });
 
                     // モーダルを表示
@@ -785,7 +801,12 @@
                                 ]
                             };
 
-                            newState['angrymasterenraged'] = newPokemonData;
+                            // インスタンス管理対応
+                            if (attackerKey === "playerPokemon") {
+                                newState.playerInstance = newPokemonData;
+                            } else if (attackerKey === "enemyPokemon") {
+                                newState.enemyInstance = newPokemonData;
+                            }
 
                             return newState;
                         });
@@ -1128,10 +1149,18 @@
             // ゲームリセット関数
             const resetGame = () => {
                 setGameState(prev => {
-                    const pokemonData = initializePokemonData();
+                    // 現在選択されているポケモンを保持してリセット
+                    const currentPlayerPokemon = prev.playerPokemon;
+                    const currentEnemyPokemon = prev.enemyPokemon;
+
+                    // 現在のポケモンで新しいインスタンスを作成
+                    const playerInstance = createPokemonInstance(currentPlayerPokemon, 'player');
+                    const enemyInstance = createPokemonInstance(currentEnemyPokemon, 'enemy');
+
                     return {
                         ...prev,
-                        ...pokemonData,
+                        playerInstance: playerInstance,
+                        enemyInstance: enemyInstance,
                         currentTurn: "player",
                         battleLog: ["バトル開始！"],
                         isGameOver: false,
