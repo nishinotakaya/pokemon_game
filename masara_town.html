@@ -290,6 +290,9 @@
                       setGameState(prevState => ({ ...prevState, isEncountering: true, encounterPokemon: wildPokemon }));
 
                       // エンカウントBGMを再生（即座に）
+                      const bgmStartTime = Date.now(); // BGM開始時刻を記録
+
+                      // BGMを即座に開始
                       setTimeout(() => {
                         const player = playerRef.current;
                         if (player && bgmPlayerReady) {
@@ -300,7 +303,6 @@
                             console.log('エンカウントBGMを再生しました');
                           } catch (error) {
                             console.log('BGM再生エラー:', error);
-                            // エラー時は少し待って再試行
                             setTimeout(() => {
                               try {
                                 player.playVideo();
@@ -320,10 +322,14 @@
 
                         if (opacity <= 0) {
                           clearInterval(fadeInterval);
-                          // バトル画面に遷移
-                          setTimeout(() => {
-                            window.location.href = `index.html?enemy=${wildPokemon}&from=masara&playerX=${newX}&playerY=${newY}`;
-                          }, 200);
+                          // バトル画面に遷移（BGM開始時刻をURLパラメータとして渡す）
+                          const transitionTime = Date.now(); // 遷移開始時刻
+                          const elapsedTime = transitionTime - bgmStartTime; // 経過時間（ミリ秒）
+                          const elapsedSeconds = elapsedTime / 1000; // 経過秒数（小数点以下も含む）
+                          // 遷移とページ読み込みの遅延も考慮
+                          const finalElapsed = elapsedSeconds + 0.3;
+                          // 即座に遷移（BGMを切らさないように）
+                          window.location.href = `index.html?enemy=${wildPokemon}&from=masara&playerX=${newX}&playerY=${newY}&bgmStart=${finalElapsed.toFixed(2)}`;
                         }
                       }, 50); // 50msごとに約1.67%ずつ暗くする（60ステップ × 50ms = 3000ms = 3秒）
                     }
