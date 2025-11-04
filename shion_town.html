@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シオンタウン - ポケモン冒険</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React 17 CDN -->
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <!-- ポケモンデータ -->
+  <script src="pokemon-data.js"></script>
+  <script src="move-data.js"></script>
+  <script src="type-effectiveness.js"></script>
+
+  <!-- シオンタウンのロジック -->
+  <script src="shion_town.js"></script>
+
+  <style>
+    @keyframes walk {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-3px);
+      }
+    }
+
+    .walk-animation {
+      animation: walk 0.5s ease-in-out infinite;
+    }
+
+    .grass-tile {
+      background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .grass-tile:hover {
+      background: linear-gradient(135deg, #98FB98 0%, #50C878 100%);
+    }
+
+    .grass-tile::before {
+      content: '🌿';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      opacity: 0.3;
+    }
+
+    .path-tile {
+      background: linear-gradient(135deg, #D2B48C 0%, #C19A6B 100%);
+    }
+
+    .house-tile {
+      background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+    }
+
+    .water-tile {
+      background: linear-gradient(135deg, #4169E1 0%, #1E90FF 100%);
+      position: relative;
+    }
+
+    .water-tile::before {
+      content: '🌊';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
+      opacity: 0.4;
+    }
+
+    .pokemon-center-tile {
+      background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+      position: relative;
+    }
+
+    .pokemon-center-tile::before {
+      content: '🏥';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      opacity: 0.8;
+    }
+
+    .player {
+      transition: all 0.2s ease-out;
+      z-index: 10;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    .encounter-notification {
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .fade-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: black;
+      z-index: 9999;
+      pointer-events: none;
+      transition: opacity 0.03s linear;
+    }
+
+    .encounter-shake {
+      animation: encounterShake 0.5s ease-in-out;
+    }
+
+    @keyframes encounterShake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-10px);
+      }
+
+      75% {
+        transform: translateX(10px);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const ShionTownComponent = () => {
+      // YouTubeプレイヤーの参照
+      const playerRef = React.useRef(null);
+      const [bgmPlayerReady, setBgmPlayerReady] = React.useState(false);
+
+      // URLパラメータから位置を取得
+      const getInitialPosition = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const x = urlParams.get('x');
+        const y = urlParams.get('y');
+        if (x && y) {
+          return { x: parseInt(x), y: parseInt(y) };
+        }
+        return { x: 7, y: 7 }; // デフォルト位置
+      };
+
+      const [gameState, setGameState] = React.useState({
+        playerPosition: getInitialPosition(),
+        mapData: window.shionTownMap || [],
+        isMoving: false,
+        encounterChance: 0,
+        showEncounterNotification: false,
+        encounterPokemon: null,
+        isEncountering: false, // エンカウント中のフラグ
+        fadeOpacity: 1.0 // フェードアウトの透明度
+      });
+
+      // YouTubeプレイヤーの初期化
+      React.useEffect(() => {
+        if (typeof YT === 'undefined') {
+          console.log('YouTube API not loaded yet');
+          return;
+        }
+
+        const initYouTubePlayer = () => {
+          try {
+            playerRef.current = new YT.Player('yt-player-shion', {
+              videoId: 'Q53CDIGPJ58',
+              height: '0',
+              width: '0',
+              playerVars: {
+                start: 408,
+                end: 489,
+                loop: 1,
+                playlist: 'Q53CDIGPJ58',
+                controls: 0,
+                disablekb: 1,
+                rel: 0,
+                playsinline: 1,
+                autoplay: 0,
+                mute: 0
+              },
+              events: {
+                onReady: (event) => {
+                  console.log('Shion Town YouTube player ready');
+                  event.target.setVolume(30);
+                  setBgmPlayerReady(true);
+                },
+                onStateChange: (event) => {
+                  if (event.data === YT.PlayerState.ENDED) {
+                    event.target.seekTo(408);
+                    event.target.playVideo();
+                  }
+                },
+                onError: (event) => {
+                  console.log('YouTube player error:', event.data);
+                }
+              }
+            });
+          } catch (error) {
+            console.log('YouTube player creation error:', error);
+          }
+        };
+
+        if (YT && YT.Player) {
+          initYouTubePlayer();
+        } else {
+          window.onYouTubeIframeAPIReady = initYouTubePlayer;
+        }
+      }, []);
+
+      // マップデータの初期化
+      React.useEffect(() => {
+        if (window.shionTownMap && window.shionTownMap.length > 0) {
+          setGameState(prev => ({ ...prev, mapData: window.shionTownMap }));
+        } else {
+          // デフォルトマップ（20x20）
+          const defaultMap = Array(20).fill(null).map((_, row) =>
+            Array(20).fill(null).map((_, col) => {
+              // 外周は家や壁
+              if (row === 0 || row === 19 || col === 0 || col === 19) {
+                return { type: 'house', walkable: false };
+              }
+              // 水エリア（一部）
+              if ((row >= 5 && row <= 7 && col >= 10 && col <= 12) ||
+                (row >= 12 && row <= 14 && col >= 5 && col <= 7)) {
+                return { type: 'water', walkable: false };
+              }
+              // ポケモンセンター
+              if ((row >= 2 && row <= 3 && col >= 2 && col <= 3)) {
+                return { type: 'pokemonCenter', walkable: false };
+              }
+              // 中央部はランダムに草むら
+              if (row >= 4 && row <= 15 && col >= 4 && col <= 15) {
+                return Math.random() > 0.25 ? { type: 'grass', walkable: true } : { type: 'path', walkable: true };
+              }
+              // それ以外は道
+              return { type: 'path', walkable: true };
+            })
+          );
+          setGameState(prev => ({ ...prev, mapData: defaultMap }));
+        }
+      }, []);
+
+      // キーボード入力処理
+      React.useEffect(() => {
+        const handleKeyPress = (e) => {
+          if (gameState.isMoving || gameState.isEncountering) return;
+
+          const { x, y } = gameState.playerPosition;
+          let newX = x;
+          let newY = y;
+
+          switch (e.key) {
+            case 'ArrowUp':
+            case 'w':
+            case 'W':
+              newY = Math.max(0, y - 1);
+              break;
+            case 'ArrowDown':
+            case 's':
+            case 'S':
+              newY = Math.min(gameState.mapData.length - 1, y + 1);
+              break;
+            case 'ArrowLeft':
+            case 'a':
+            case 'A':
+              newX = Math.max(0, x - 1);
+              break;
+            case 'ArrowRight':
+            case 'd':
+            case 'D':
+              newX = Math.min(gameState.mapData[0].length - 1, x + 1);
+              break;
+            default:
+              return;
+          }
+
+          // 移動可能かチェック
+          if (gameState.mapData[newY] && gameState.mapData[newY][newX] && gameState.mapData[newY][newX].walkable) {
+            setGameState(prev => ({ ...prev, isMoving: true }));
+
+            setTimeout(() => {
+              setGameState(prev => {
+                const newState = { ...prev, playerPosition: { x: newX, y: newY }, isMoving: false };
+
+                // 草むらのエンカウント判定
+                const currentTile = prev.mapData[newY][newX];
+                if (currentTile.type === 'grass' && !prev.isEncountering) {
+                  const encounterRate = Math.random();
+                  if (encounterRate < 0.18) { // 18%の確率でエンカウント
+                    const wildPokemon = window.getRandomWildPokemon('shion');
+                    if (wildPokemon) {
+                      // エンカウント開始
+                      setGameState(prevState => ({ ...prevState, isEncountering: true, encounterPokemon: wildPokemon }));
+
+                      // エンカウントBGMを再生（即座に）
+                      setTimeout(() => {
+                        const player = playerRef.current;
+                        if (player && bgmPlayerReady) {
+                          try {
+                            player.seekTo(408, true);
+                            player.setVolume(30);
+                            player.playVideo();
+                            console.log('エンカウントBGMを再生しました');
+                          } catch (error) {
+                            console.log('BGM再生エラー:', error);
+                            // エラー時は少し待って再試行
+                            setTimeout(() => {
+                              try {
+                                player.playVideo();
+                              } catch (err) {
+                                console.log('BGM再試行エラー:', err);
+                              }
+                            }, 500);
+                          }
+                        }
+                      }, 100);
+
+                      // フェードアウトアニメーション（3秒かけて徐々に暗くなる）
+                      let opacity = 1.0;
+                      const fadeInterval = setInterval(() => {
+                        opacity -= 0.0167; // 1/60 ≈ 0.0167
+                        setGameState(prevState => ({ ...prevState, fadeOpacity: opacity }));
+
+                        if (opacity <= 0) {
+                          clearInterval(fadeInterval);
+                          // バトル画面に遷移
+                          setTimeout(() => {
+                            window.location.href = `index.html?enemy=${wildPokemon}&from=shion&playerX=${newX}&playerY=${newY}`;
+                          }, 200);
+                        }
+                      }, 50); // 50msごとに約1.67%ずつ暗くする（60ステップ × 50ms = 3000ms = 3秒）
+                    }
+                  }
+                }
+
+                return newState;
+              });
+            }, 200);
+          }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+      }, [gameState.playerPosition, gameState.mapData, gameState.isMoving, gameState.isEncountering]);
+
+      // マップタイルのレンダリング
+      const renderTile = (tile, row, col) => {
+        const isPlayer = gameState.playerPosition.x === col && gameState.playerPosition.y === row;
+
+        let tileClass = 'w-10 h-10 border border-gray-600 flex items-center justify-center relative';
+
+        if (tile.type === 'grass') {
+          tileClass += ' grass-tile';
+        } else if (tile.type === 'path') {
+          tileClass += ' path-tile';
+        } else if (tile.type === 'house') {
+          tileClass += ' house-tile';
+        } else if (tile.type === 'water') {
+          tileClass += ' water-tile';
+        } else if (tile.type === 'pokemonCenter') {
+          tileClass += ' pokemon-center-tile';
+        }
+
+        return React.createElement('div', {
+          key: `tile-${row}-${col}`,
+          className: tileClass
+        }, [
+          // ポケモンセンターの場合は画像を表示
+          tile.type === 'pokemonCenter' && React.createElement('img', {
+            key: 'center-image',
+            src: 'ポケモンセンター.png',
+            alt: 'ポケモンセンター',
+            className: 'absolute inset-0 w-full h-full object-cover opacity-80',
+            style: { imageRendering: 'pixelated' }
+          }),
+          isPlayer && React.createElement('img', {
+            key: 'player-image',
+            src: 'ポケモントレーナー_1.png',
+            alt: 'プレイヤー',
+            className: 'player walk-animation relative z-10',
+            style: {
+              width: '2rem',
+              height: '2rem',
+              objectFit: 'contain',
+              imageRendering: 'pixelated'
+            }
+          })
+        ]);
+      };
+
+      return React.createElement('div', {
+        className: 'min-h-screen bg-gradient-to-b from-purple-900 via-purple-800 to-indigo-800 p-4 relative',
+        style: gameState.isEncountering ? { filter: 'brightness(0.8)' } : {}
+      }, [
+        // YouTubeプレイヤー（非表示）
+        React.createElement('div', {
+          key: 'youtube-player',
+          id: 'yt-player-shion',
+          style: { position: 'absolute', left: '-9999px', top: '-9999px' }
+        }),
+        // フェードアウトオーバーレイ
+        gameState.isEncountering && React.createElement('div', {
+          key: 'fade-overlay',
+          className: 'fade-overlay',
+          style: { opacity: 1 - gameState.fadeOpacity }
+        }),
+        // ヘッダー
+        React.createElement('div', {
+          key: 'header',
+          className: 'text-center mb-6'
+        }, [
+          React.createElement('h1', {
+            key: 'title',
+            className: 'text-4xl font-bold text-white mb-2 drop-shadow-lg'
+          }, 'シオンタウン'),
+          React.createElement('p', {
+            key: 'subtitle',
+            className: 'text-lg text-yellow-300 drop-shadow-md'
+          }, '矢印キーまたはWASDで移動'),
+          React.createElement('p', {
+            key: 'hint',
+            className: 'text-sm text-gray-300 mt-2'
+          }, '🌿 草むらに入ると野生ポケモンと出会う可能性があります！'),
+          gameState.isEncountering && React.createElement('div', {
+            key: 'encounter-message',
+            className: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[10000] text-white text-3xl font-bold text-center bg-black/90 px-10 py-6 rounded-lg animate-pulse border-4 border-yellow-400',
+            style: { opacity: Math.min(1, 1.5 - gameState.fadeOpacity) } // フェードアウトに合わせて徐々に消える
+          }, [
+            // ピカチュウの場合は特別な画像を表示
+            gameState.encounterPokemon === 'pikachu' && React.createElement('img', {
+              key: 'pikachu-encounter-image',
+              src: 'ピカチュウ遭遇.png',
+              alt: 'ピカチュウ遭遇',
+              className: 'mx-auto mb-4',
+              style: {
+                width: '300px',
+                height: 'auto',
+                imageRendering: 'pixelated',
+                filter: 'drop-shadow(0 0 20px rgba(255, 255, 0, 0.8))'
+              }
+            }),
+            React.createElement('div', { key: 'encounter-text', className: 'mb-3' }, '野生のポケモンが現れた！'),
+            gameState.encounterPokemon && window.pokemonDatabase && window.pokemonDatabase[gameState.encounterPokemon] && React.createElement('div', {
+              key: 'pokemon-name',
+              className: 'text-2xl mt-3 text-yellow-300 font-black'
+            }, window.pokemonDatabase[gameState.encounterPokemon].name + 'が現れた！')
+          ])
+        ]),
+
+        // マップ表示
+        React.createElement('div', {
+          key: 'map-container',
+          className: `flex justify-center items-center mb-6 overflow-x-auto ${gameState.isEncountering ? 'encounter-shake' : ''}`
+        }, React.createElement('div', {
+          className: 'bg-black/50 p-4 rounded-lg shadow-2xl'
+        }, gameState.mapData.map((row, rowIndex) =>
+          React.createElement('div', {
+            key: `row-${rowIndex}`,
+            className: 'flex'
+          }, row.map((tile, colIndex) => renderTile(tile, rowIndex, colIndex)))
+        ))),
+
+        // プレイヤー情報
+        React.createElement('div', {
+          key: 'player-info',
+          className: 'max-w-md mx-auto bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4'
+        }, [
+          React.createElement('div', {
+            key: 'position',
+            className: 'text-white mb-2'
+          }, `位置: (${gameState.playerPosition.x}, ${gameState.playerPosition.y})`),
+          React.createElement('div', {
+            key: 'instructions',
+            className: 'text-sm text-gray-300'
+          }, [
+            React.createElement('div', { key: 'inst1' }, '←→↑↓ または WASD: 移動'),
+            React.createElement('div', { key: 'inst2' }, '🌿 草むら: 野生ポケモンと出会う可能性あり'),
+            React.createElement('div', { key: 'inst3' }, '🌊 水: 進入不可'),
+            React.createElement('div', { key: 'inst4' }, '🏠 建物: 進入不可'),
+            React.createElement('div', { key: 'inst5' }, '🏥 ポケモンセンター: 進入不可')
+          ])
+        ]),
+
+        // メインメニューへの戻るボタン
+        React.createElement('div', {
+          key: 'menu-buttons',
+          className: 'text-center'
+        }, React.createElement('button', {
+          onClick: () => window.location.href = 'index.html',
+          className: 'bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105'
+        }, 'バトル画面に戻る'))
+      ]);
+    };
+
+    // レンダリング
+    ReactDOM.render(React.createElement(ShionTownComponent), document.getElementById('root'));
+  </script>
+</body>
+
+</html>

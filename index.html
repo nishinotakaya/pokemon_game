@@ -305,6 +305,13 @@
                     return;
                 }
 
+                // URLパラメータから野生ポケモンかどうかを判定
+                const urlParams = new URLSearchParams(window.location.search);
+                const fromMap = urlParams.get('from');
+                const enemyParam = urlParams.get('enemy');
+                const isWildPokemon = !!(fromMap && enemyParam); // マップから来て、敵ポケモンが指定されている場合
+                const initialVolume = bgmState.volume;
+
                 const initYouTubePlayer = () => {
                     try {
                         playerRef.current = new YT.Player('yt-player', {
@@ -320,15 +327,41 @@
                                 disablekb: 1,
                                 rel: 0,
                                 playsinline: 1,
-                                autoplay: 0,
+                                autoplay: isWildPokemon ? 1 : 0, // 野生ポケモンの場合は自動再生
                                 mute: 0
                             },
                             events: {
                                 onReady: (event) => {
                                     console.log('YouTube player ready');
-                                    event.target.setVolume(bgmState.volume * 100);
+                                    event.target.setVolume(initialVolume * 100);
                                     // プレイヤーが準備できたことを示すフラグ
                                     window.youtubePlayerReady = true;
+
+                                    // 野生ポケモンの場合は自動的にBGMを再生（マップから継続）
+                                    if (isWildPokemon) {
+                                        setTimeout(() => {
+                                            try {
+                                                // マップ画面で既にBGMが流れている場合は、そのまま継続
+                                                // 新しいプレイヤーでも同じ位置から再生を開始
+                                                event.target.seekTo(408, true);
+                                                event.target.setVolume(initialVolume * 100);
+                                                event.target.playVideo();
+                                                setBgmState(prev => ({ ...prev, isPlaying: true }));
+                                                console.log('野生ポケモン戦：BGMを継続再生しました');
+                                            } catch (error) {
+                                                console.log('Auto-play BGM error:', error);
+                                                // エラーが発生した場合、もう一度試行
+                                                setTimeout(() => {
+                                                    try {
+                                                        event.target.playVideo();
+                                                        setBgmState(prev => ({ ...prev, isPlaying: true }));
+                                                    } catch (err) {
+                                                        console.log('Retry play error:', err);
+                                                    }
+                                                }, 500);
+                                            }
+                                        }, 100); // マップから来た場合はすぐに再生（すでに流れているはずなので）
+                                    }
                                 },
                                 onStateChange: (event) => {
                                     console.log('YouTube player state changed:', event.data);
@@ -337,6 +370,12 @@
                                         // 8分9秒で終了したら6分48秒に戻ってループ
                                         event.target.seekTo(408);
                                         event.target.playVideo();
+                                    }
+                                    // 再生状態を同期
+                                    if (event.data === YT.PlayerState.PLAYING) {
+                                        setBgmState(prev => ({ ...prev, isPlaying: true }));
+                                    } else if (event.data === YT.PlayerState.PAUSED) {
+                                        setBgmState(prev => ({ ...prev, isPlaying: false }));
                                     }
                                 },
                                 onError: (event) => {
@@ -356,7 +395,7 @@
                 } else {
                     window.onYouTubeIframeAPIReady = initYouTubePlayer;
                 }
-            }, []);
+            }, []); // 初回のみ実行
 
             /* ---- BGM 再生/停止 トグル ---- */
             const toggleBGM = () => {
@@ -458,6 +497,16 @@
                 };
             };
 
+            // URLパラメータから敵ポケモンを取得
+            const getEnemyPokemonFromURL = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const enemyKey = urlParams.get('enemy');
+                if (enemyKey && window.pokemonDatabase && window.pokemonDatabase[enemyKey]) {
+                    return enemyKey;
+                }
+                return 'eevee'; // デフォルト
+            };
+
             // 初期ポケモンデータの準備（インスタンス管理対応）
             const initializePokemonData = () => {
                 const initialData = {};
@@ -468,21 +517,31 @@
                     initialData.playerInstance = playerPokemon;
                 }
 
-                // 敵用インスタンス
-                const enemyPokemon = createPokemonInstance('eevee', 'enemy');
+                // 敵用インスタンス（URLパラメータから取得、なければデフォルト）
+                const enemyPokemonKey = getEnemyPokemonFromURL();
+                const enemyPokemon = createPokemonInstance(enemyPokemonKey, 'enemy');
                 if (enemyPokemon) {
                     initialData.enemyInstance = enemyPokemon;
+                    initialData.enemyPokemon = enemyPokemonKey;
                 }
 
                 return initialData;
             };
+
+            // URLパラメータから情報を取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromMap = urlParams.get('from');
+            const playerX = urlParams.get('playerX');
+            const playerY = urlParams.get('playerY');
+            const enemyParam = urlParams.get('enemy');
+            const isWildPokemon = !!(fromMap && enemyParam); // マップから来て、敵ポケモンが指定されている場合
 
             // 状態管理
             const [gameState, setGameState] = React.useState(() => {
                 const pokemonData = initializePokemonData();
                 return {
                     playerPokemon: "pikachu",
-                    enemyPokemon: "eevee",
+                    enemyPokemon: pokemonData.enemyPokemon || "eevee",
                     ...pokemonData,
                     currentTurn: "player",
                     battleLog: [],
@@ -492,6 +551,9 @@
                     selectorMode: null, // "player" or "enemy"
                     showWinModal: false,
                     showEnrageModal: false,
+                    fromMap: fromMap, // どのマップから来たか
+                    playerPosition: playerX && playerY ? { x: parseInt(playerX), y: parseInt(playerY) } : null,
+                    isWildPokemon: isWildPokemon, // 野生ポケモンかどうか
                     animationState: {
                         pikachuShake: false,
                         eeveeShake: false,
@@ -1552,15 +1614,27 @@
                         ))
                     ]),
 
-                    // リセットボタン
+                    // リセットボタンとマップ遷移ボタン
                     React.createElement('div', {
                         key: 'reset-section',
-                        className: 'text-center'
-                    }, React.createElement('button', {
-                        key: 'reset-button',
-                        onClick: resetGame,
-                        className: 'bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95'
-                    }, 'ゲームリセット'))
+                        className: 'text-center space-x-4'
+                    }, [
+                        React.createElement('button', {
+                            key: 'reset-button',
+                            onClick: resetGame,
+                            className: 'bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95'
+                        }, 'ゲームリセット'),
+                        React.createElement('button', {
+                            key: 'map-masara-button',
+                            onClick: () => window.location.href = 'masara_town.html',
+                            className: 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95'
+                        }, '🗺️ マサラタウンへ'),
+                        React.createElement('button', {
+                            key: 'map-shion-button',
+                            onClick: () => window.location.href = 'shion_town.html',
+                            className: 'bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95'
+                        }, '🗺️ シオンタウンへ')
+                    ])
                 ]),
 
                 // ポケモン選択モーダル
@@ -1648,11 +1722,27 @@
                         }, gameState.winner === 'player'
                             ? `${getCurrentPokemon('playerPokemon').name}の勝利！`
                             : `${getCurrentPokemon('enemyPokemon').name}の勝利！`),
-                        React.createElement('button', {
-                            key: 'close-win-modal',
-                            onClick: () => setGameState(prev => ({ ...prev, showWinModal: false })),
-                            className: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full text-xl transform hover:scale-105 transition-all duration-200 shadow-xl'
-                        }, '閉じる')
+                        React.createElement('div', {
+                            key: 'win-modal-buttons',
+                            className: 'flex gap-4 justify-center'
+                        }, [
+                            React.createElement('button', {
+                                key: 'close-win-modal',
+                                onClick: () => setGameState(prev => ({ ...prev, showWinModal: false })),
+                                className: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full text-xl transform hover:scale-105 transition-all duration-200 shadow-xl'
+                            }, '閉じる'),
+                            gameState.fromMap && React.createElement('button', {
+                                key: 'return-to-map',
+                                onClick: () => {
+                                    const mapUrl = gameState.fromMap === 'masara' ? 'masara_town.html' : 'shion_town.html';
+                                    const positionParams = gameState.playerPosition
+                                        ? `?x=${gameState.playerPosition.x}&y=${gameState.playerPosition.y}`
+                                        : '';
+                                    window.location.href = mapUrl + positionParams;
+                                },
+                                className: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-full text-xl transform hover:scale-105 transition-all duration-200 shadow-xl'
+                            }, '🗺️ マップに戻る')
+                        ])
                     ])
                 ])),
 
