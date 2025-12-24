@@ -570,36 +570,6 @@ const pokemonDatabase = {
     stats: { attack: 90, defense: 70, speed: 95, special: 85 }
   },
 
-  // あ0こし
-  angrymaster: {
-    name: "あ０こし",
-    maxHP: 170,
-    type: "かくとう",
-    image: "あさこし.png",
-    moves: [
-      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
-      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
-      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
-      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 }
-    ],
-    stats: { attack: 140, defense: 70, speed: 80, special: 60 }
-  },
-
-  // あ0こし（怒り状態）
-  angrymasterenraged: {
-    name: "あ0こし",
-    maxHP: 170,
-    type: "かくとう",
-    image: "ええ加減にしよし.png",
-    moves: [
-      { name: "ブチギレる", power: 0, type: "ノーマル", accuracy: 100, pp: 15 },
-      { name: "メガトンパンチ", power: 70, type: "かくとう", accuracy: 100, pp: 25 },
-      { name: "四の字固め", power: 300, type: "かくとう", accuracy: 30, pp: 5 },
-      { name: "パソコンで殴る", power: 115, type: "はがね", accuracy: 60, pp: 15 }
-    ],
-    stats: { attack: 140, defense: 70, speed: 80, special: 60 }
-  },
-
   // 人気ポケモン追加
   lucario: {
     name: "ルカリオ",

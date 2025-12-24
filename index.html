@@ -2143,16 +2143,27 @@
                 else if (tile.type === 'water') tileClass += ' water-tile';
                 else if (tile.type === 'pokemonCenter') tileClass += ' pokemon-center-tile';
 
+                // ポケモンセンターの左上のタイル（row=2, col=2）でのみ画像を表示（4マス分の大きさ、正方形）
+                const isPokemonCenterTopLeft = tile.type === 'pokemonCenter' && row === 2 && col === 2;
+
                 return React.createElement('div', {
                     key: `tile-${row}-${col}`,
                     className: tileClass
                 }, [
-                    tile.type === 'pokemonCenter' && React.createElement('img', {
+                    isPokemonCenterTopLeft && React.createElement('img', {
                         key: 'center-image',
                         src: 'ポケモンセンター.png',
                         alt: 'ポケモンセンター',
-                        className: 'absolute inset-0 w-full h-full object-cover opacity-80',
-                        style: { imageRendering: 'pixelated' }
+                        className: 'absolute opacity-80',
+                        style: {
+                            imageRendering: 'pixelated',
+                            width: '400%', // 4マス分の幅（2x2 = 正方形）
+                            height: '400%', // 4マス分の高さ（2x2 = 正方形）
+                            left: '0',
+                            top: '0',
+                            zIndex: 5,
+                            objectFit: 'cover' // 正方形のアスペクト比を保つ
+                        }
                     }),
                     isPlayer && React.createElement('img', {
                         key: 'player-image',
